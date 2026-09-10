@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Table, Clock, User, Coffee } from 'lucide-react';
 
 export default function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
-  if (!feedback) return null;
-
   const [note, setNote] = useState('');
+
+  if (!feedback) return null;
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
 
   // Generate personalized WhatsApp recovery link
@@ -20,7 +20,7 @@ export default function FeedbackDetailModal({ feedback, onClose, onResolve, sett
     if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
     }
-    window.open(`https://wa.me/${phoneDigits}?text=${encoded}`, '_blank');
+    window.open(`https://wa.me/${phoneDigits}?text=${encoded}`, '_blank', 'noopener,noreferrer');
     onResolve(feedback.id, 'RESOLVED', 'Contacted guest via WhatsApp');
   };
 
