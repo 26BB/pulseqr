@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FUNNEL_STATS, POPULAR_TAGS, BARISTAS } from '../../data/mockData';
-import { TrendingUp, Users, ArrowRight, Star, Clock, AlertCircle } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 export default function AnalyticsView({ feedbacks }) {
-  const total = feedbacks.length;
-  const avgFood = (
-    feedbacks.reduce((acc, f) => acc + f.ratings.food, 0) / total || 4.4
-  ).toFixed(1);
-  const avgService = (
-    feedbacks.reduce((acc, f) => acc + f.ratings.service, 0) / total || 4.6
-  ).toFixed(1);
-  const avgAmbiance = (
-    feedbacks.reduce((acc, f) => acc + f.ratings.ambiance, 0) / total || 3.8
-  ).toFixed(1);
+  // Optimization: Single-pass O(N) calculation memoized with useMemo instead of running 3 separate .reduce() passes
+  const { avgFood, avgService, avgAmbiance } = useMemo(() => {
+    const total = feedbacks.length;
+    if (!total) return { avgFood: '4.4', avgService: '4.6', avgAmbiance: '3.8' };
+
+    let foodSum = 0;
+    let serviceSum = 0;
+    let ambianceSum = 0;
+
+    for (let i = 0; i < total; i++) {
+      const f = feedbacks[i];
+      foodSum += f.ratings.food;
+      serviceSum += f.ratings.service;
+      ambianceSum += f.ratings.ambiance;
+    }
+
+    return {
+      avgFood: (foodSum / total).toFixed(1),
+      avgService: (serviceSum / total).toFixed(1),
+      avgAmbiance: (ambianceSum / total).toFixed(1),
+    };
+  }, [feedbacks]);
 
   return (
     <div className="space-y-6">
