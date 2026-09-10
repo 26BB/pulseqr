@@ -2,7 +2,7 @@
 
 > **GTM Launch Simulator Portfolio Project**  
 > Built by **Bhushan Bhosale** for Founder's Office & PM Roles at Pune Startups.  
-> 🔗 **Live Demo:** Deployed on Vercel  
+> 🔗 **Live Web App:** [https://pulseqr-app.vercel.app](https://pulseqr-app.vercel.app)  
 > 🎨 **Design System:** Google Stitch (*Solar Cafe Pulse* + *Cafe Pulse*)
 
 ---
