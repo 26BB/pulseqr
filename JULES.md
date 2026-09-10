@@ -67,3 +67,19 @@ npm run build
   1. What was changed.
   2. The measurable improvement (e.g., "-12 kB bundle size" or "patched XSS surface").
   3. Proof of `npm run build` passing.
+
+---
+
+## 🌅 6. Daily Morning Routine (Scheduled Run)
+
+When triggered on your scheduled morning task:
+1. **Read & Align**: Review this document, offline `BroadcastChannel`/`localStorage` state model, and strict guardrails.
+2. **Execute Verification**: Run `npm run build` and ensure the production JS bundle remains strictly under 350 kB (gzipped < 105 kB).
+3. **Dual-Agent Review**:
+   - **Bolt ⚡ (Performance)**: Verify SVG icon tree-shaking, check `React.memo` / `useMemo` on analytics calculations, ensure emoji touch targets remain fast and responsive.
+   - **Sentinel 🛡️ (Security)**: Audit diner inputs against XSS, ensure `localStorage` calls are safely wrapped in `try/catch`, check `npm audit`.
+4. **Surgical MVP Fixes**: If any build issues occur or low-risk optimizations are detected, apply safe fixes (keep diff < 100 lines).
+5. **Re-Verify**: Confirm `npm run build` completes cleanly with 0 errors and 0 warnings.
+6. **Log & Document**: Append an entry to [`docs/AUTONOMOUS_MAINTENANCE_LOG.md`](./docs/AUTONOMOUS_MAINTENANCE_LOG.md).
+7. **Open PR**: Create a clean Pull Request titled `chore(maintenance): morning health squad [YYYY-MM-DD]` for human review.
+
