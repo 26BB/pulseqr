@@ -3,19 +3,12 @@ import AnalyticsView from './AnalyticsView';
 import SettingsView from './SettingsView';
 import FeedbackDetailModal from './FeedbackDetailModal';
 import {
-  Coffee,
   Activity,
   BarChart3,
   Settings,
-  AlertCircle,
-  Star,
-  Clock,
   ArrowUpRight,
-  Filter,
   CheckCircle,
   QrCode,
-  Sparkles,
-  PieChart,
 } from 'lucide-react';
 
 export default function AdminDashboard({

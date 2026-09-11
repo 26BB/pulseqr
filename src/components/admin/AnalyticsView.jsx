@@ -1,6 +1,6 @@
 import React from 'react';
 import { FUNNEL_STATS, POPULAR_TAGS, BARISTAS } from '../../data/mockData';
-import { TrendingUp, Users, ArrowRight, Star, Clock, AlertCircle } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 export default function AnalyticsView({ feedbacks }) {
   const total = feedbacks.length;

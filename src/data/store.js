@@ -19,7 +19,7 @@ export const getStoredSettings = () => {
       return INITIAL_SETTINGS;
     }
     return JSON.parse(raw);
-  } catch (e) {
+  } catch {
     return INITIAL_SETTINGS;
   }
 };
@@ -41,7 +41,7 @@ export const getStoredFeedbacks = () => {
       return INITIAL_FEEDBACKS;
     }
     return JSON.parse(raw);
-  } catch (e) {
+  } catch {
     return INITIAL_FEEDBACKS;
   }
 };

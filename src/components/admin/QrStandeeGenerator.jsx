@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Printer, Download, Sparkles, Coffee, ShieldCheck, Check } from 'lucide-react';
+import { X, Printer, Download, ShieldCheck } from 'lucide-react';
 
 export default function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
-  const [printAll, setPrintAll] = useState(false);
   const totalTables = settings?.tableCount || 15;
 
   const tablesList = Array.from({ length: totalTables }, (_, i) =>
