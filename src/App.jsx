@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DemoBar from './components/common/DemoBar';
 import DinerView from './components/diner/DinerView';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -96,9 +96,12 @@ export default function App() {
     setFeedbacks(getStoredFeedbacks());
   };
 
-  const pendingAlertCount = feedbacks.filter(
-    (f) => f.isAlert && f.status === 'ALERT_TRIGGERED'
-  ).length;
+  // Performance optimization: Memoize pending alert count computation
+  // Prevents re-filtering the feedbacks array on unrelated re-renders (e.g. switching views, changing tables, opening modals)
+  const pendingAlertCount = useMemo(
+    () => feedbacks.filter((f) => f.isAlert && f.status === 'ALERT_TRIGGERED').length,
+    [feedbacks]
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">

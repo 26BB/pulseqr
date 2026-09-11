@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Table, Clock, User, Coffee } from 'lucide-react';
 
 export default function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
+  const [note, setNote] = useState('');
+
   if (!feedback) return null;
 
-  const [note, setNote] = useState('');
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
 
   // Generate personalized WhatsApp recovery link
