@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DemoBar from './components/common/DemoBar';
 import DinerView from './components/diner/DinerView';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -23,8 +23,10 @@ export default function App() {
 
   const [currentView, setCurrentView] = useState(initialViewParam);
   const [currentTable, setCurrentTable] = useState(initialTableParam);
-  const [feedbacks, setFeedbacks] = useState(getStoredFeedbacks());
-  const [settings, setSettings] = useState(getStoredSettings());
+  // Optimization: Lazy state initialization avoids executing synchronous localStorage.getItem
+  // and JSON.parse on every re-render of the root App component.
+  const [feedbacks, setFeedbacks] = useState(getStoredFeedbacks);
+  const [settings, setSettings] = useState(getStoredSettings);
   const [standeesModalOpen, setStandeesModalOpen] = useState(false);
   const [docsModalOpen, setDocsModalOpen] = useState(false);
 
@@ -71,7 +73,7 @@ export default function App() {
 
   // Actions
   const handleFeedbackSubmit = (data) => {
-    const entry = addFeedback(data);
+    addFeedback(data);
     setFeedbacks(getStoredFeedbacks());
   };
 
@@ -92,13 +94,16 @@ export default function App() {
   };
 
   const handleSimulateFeedback = () => {
-    const newEntry = generateRandomDemoFeedback();
+    generateRandomDemoFeedback();
     setFeedbacks(getStoredFeedbacks());
   };
 
-  const pendingAlertCount = feedbacks.filter(
-    (f) => f.isAlert && f.status === 'ALERT_TRIGGERED'
-  ).length;
+  // Optimization: Memoize pending alert count calculation to prevent array re-filtering
+  // during unrelated re-renders (e.g. view switching, table selection, modal state toggles).
+  const pendingAlertCount = useMemo(
+    () => feedbacks.filter((f) => f.isAlert && f.status === 'ALERT_TRIGGERED').length,
+    [feedbacks]
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
