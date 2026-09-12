@@ -55,31 +55,57 @@ export const saveFeedbacks = (feedbacks) => {
   }
 };
 
+// Helper to clamp numeric ratings to safe 1-5 integer bounds
+const sanitizeRating = (val) => {
+  const num = Number(val);
+  if (isNaN(num)) return 3;
+  return Math.min(5, Math.max(1, Math.round(num)));
+};
+
+// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat
+const sanitizeString = (str, maxLen = 100, fallback = "") => {
+  if (typeof str !== "string") return fallback;
+  return str.trim().slice(0, maxLen);
+};
+
 export const addFeedback = (feedbackData) => {
   const current = getStoredFeedbacks();
   const settings = getStoredSettings();
 
+  // Validate and clamp ratings (Security: Input Validation)
+  const ratings = {
+    food: sanitizeRating(feedbackData?.ratings?.food),
+    service: sanitizeRating(feedbackData?.ratings?.service),
+    ambiance: sanitizeRating(feedbackData?.ratings?.ambiance),
+  };
+
   const overall = Number(
-    ((feedbackData.ratings.food + feedbackData.ratings.service + feedbackData.ratings.ambiance) / 3).toFixed(1)
+    ((ratings.food + ratings.service + ratings.ambiance) / 3).toFixed(1)
   );
 
   const isAlert =
-    feedbackData.ratings.food <= settings.alertThreshold ||
-    feedbackData.ratings.service <= settings.alertThreshold ||
+    ratings.food <= settings.alertThreshold ||
+    ratings.service <= settings.alertThreshold ||
     overall <= settings.alertThreshold;
+
+  // Truncate strings & tags (Security: LocalStorage DoS / Quota Exhaustion prevention)
+  const commentText = sanitizeString(feedbackData?.comment, 500, "No written comment provided.");
+  const safeTags = Array.isArray(feedbackData?.tags)
+    ? feedbackData.tags.slice(0, 10).map((t) => sanitizeString(t, 50)).filter(Boolean)
+    : [];
 
   const newEntry = {
     id: `fb-${Date.now().toString().slice(-4)}`,
-    table: feedbackData.table || "04",
+    table: sanitizeString(feedbackData?.table, 10, "04") || "04",
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
-    ratings: feedbackData.ratings,
+    ratings,
     overallScore: overall,
-    comment: feedbackData.comment || "No written comment provided.",
-    tags: feedbackData.tags || [],
+    comment: commentText || "No written comment provided.",
+    tags: safeTags,
     status: isAlert ? "ALERT_TRIGGERED" : "ACKNOWLEDGED",
-    barista: feedbackData.barista || "Pranav",
-    guestName: feedbackData.guestName || "Guest",
+    barista: sanitizeString(feedbackData?.barista, 50, "Pranav") || "Pranav",
+    guestName: sanitizeString(feedbackData?.guestName, 50, "Guest") || "Guest",
     isAlert,
   };
 
