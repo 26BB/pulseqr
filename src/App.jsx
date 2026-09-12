@@ -71,7 +71,7 @@ export default function App() {
 
   // Actions
   const handleFeedbackSubmit = (data) => {
-    const entry = addFeedback(data);
+    addFeedback(data);
     setFeedbacks(getStoredFeedbacks());
   };
 
@@ -92,7 +92,7 @@ export default function App() {
   };
 
   const handleSimulateFeedback = () => {
-    const newEntry = generateRandomDemoFeedback();
+    generateRandomDemoFeedback();
     setFeedbacks(getStoredFeedbacks());
   };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { Coffee, Sparkles, Gift, CheckCircle2, ArrowRight, ShieldCheck, Copy, Check, AlertTriangle } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 
 const EMOJIS = [
   { val: 1, symbol: '😡', label: 'Terrible' },

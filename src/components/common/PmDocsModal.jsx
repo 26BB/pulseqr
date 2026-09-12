@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, BookOpen, Target, TrendingUp, Users, Rocket, BarChart2, ShieldCheck, CheckSquare, FileText, ChevronRight } from 'lucide-react';
+import { X, Target, Users, Rocket, BarChart2, ShieldCheck, CheckSquare, FileText } from 'lucide-react';
 
 const DOCS_LIST = [
   {
