@@ -49,6 +49,16 @@ npm run build
 
 ---
 
+
+## 🛑 4.1 Strict Autonomous PR & Branch Guardrails (CRITICAL)
+
+To prevent merge collision stampedes and broken builds:
+1. **Consolidated Daily Squad Runs**: Bolt ⚡, Sentinel 🛡️, and CI Fixer MUST execute sequentially in a **single session on a single branch**. Never spawn parallel agents that touch overlapping files. Submit **only ONE consolidated Pull Request per day**.
+2. **Never Open Draft PRs**: All pull requests must be opened as **Ready for Review** (never Draft), so automated pipelines and auto-merge can process them immediately.
+3. **Always Rebase on `origin/main`**: Before creating a pull request, fetch and rebase on the latest `origin/main`. If conflicts exist, resolve them cleanly before pushing.
+4. **Zero Conflict Markers**: Never push unresolved git conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) or stray branch names into source files.
+5. **Mandatory Pre-PR Verification**: You MUST run `npm run lint` and `npm run build` locally before pushing. If either fails or produces errors/warnings, **ABORT** and do not open a pull request.
+
 ## 🛑 4. Strict Guardrails (DO NOT TOUCH)
 
 * **PM Documentation:** Never edit, move, or delete files inside the [`/docs`](./docs) directory (`PRD.md`, `MARKET-SIZING.md`, `GTM-STRATEGY.md`, etc.). These are interview-grade strategic artifacts.
