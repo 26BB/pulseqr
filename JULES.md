@@ -80,7 +80,7 @@ To prevent merge collision stampedes and broken builds:
 
 ---
 
-## 🌅 6. Daily Morning Routine (Scheduled Run)
+## 🌅 6. Daily Morning Routine (Scheduled at 01:00 Daily)
 
 When triggered on your scheduled morning task:
 1. **Read & Align**: Review this document, offline `BroadcastChannel`/`localStorage` state model, and strict guardrails.
