@@ -33,6 +33,11 @@ export default function AdminDashboard({
     return (feedbacks.reduce((acc, f) => acc + f.overallScore, 0) / (total || 1)).toFixed(1);
   }, [feedbacks, total]);
 
+  const totalAlertsCount = useMemo(
+    () => feedbacks.filter((f) => f.isAlert).length,
+    [feedbacks]
+  );
+
   const filteredFeedbacks = useMemo(() => {
     return feedbacks.filter((f) => {
       if (filter === 'alert') return f.isAlert;
@@ -231,7 +236,7 @@ export default function AdminDashboard({
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    Alerts ({feedbacks.filter((f) => f.isAlert).length})
+                    Alerts ({totalAlertsCount})
                   </button>
 
                   <button
