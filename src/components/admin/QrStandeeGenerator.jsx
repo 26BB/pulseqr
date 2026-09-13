@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Printer, Download, ShieldCheck } from 'lucide-react';
 
@@ -6,8 +6,10 @@ export default function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
   const totalTables = settings?.tableCount || 15;
 
-  const tablesList = Array.from({ length: totalTables }, (_, i) =>
-    (i + 1).toString().padStart(2, '0')
+  // Optimization: Memoize tablesList generation so array is re-created only when tableCount changes
+  const tablesList = useMemo(
+    () => Array.from({ length: totalTables }, (_, i) => (i + 1).toString().padStart(2, '0')),
+    [totalTables]
   );
 
   const getDinerUrl = (table) => {
