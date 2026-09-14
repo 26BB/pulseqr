@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import AnalyticsView from './AnalyticsView';
 import SettingsView from './SettingsView';
 import FeedbackDetailModal from './FeedbackDetailModal';
@@ -45,6 +45,11 @@ export default function AdminDashboard({
       return true;
     });
   }, [feedbacks, filter]);
+
+  // Optimization: Memoize feedback selection callback so FeedbackCard child components don't re-render when parent state changes
+  const handleSelectFeedback = useCallback((fb) => {
+    setSelectedFeedback(fb);
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6">
@@ -254,83 +259,13 @@ export default function AdminDashboard({
 
               {/* Feed Items */}
               <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-                {filteredFeedbacks.map((fb) => {
-                  const isPendingAlert = fb.isAlert && fb.status === 'ALERT_TRIGGERED';
-                  return (
-                    <div
-                      key={fb.id}
-                      onClick={() => setSelectedFeedback(fb)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-md ${
-                        isPendingAlert
-                          ? 'bg-rose-50/90 border-rose-300 ring-2 ring-rose-200'
-                          : 'bg-slate-50/80 border-slate-200 hover:border-[#4A90FF]/50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`font-black px-2.5 py-0.5 rounded-lg text-xs ${
-                              isPendingAlert
-                                ? 'bg-rose-600 text-white'
-                                : 'bg-slate-900 text-white'
-                            }`}
-                          >
-                            Table #{fb.table}
-                          </span>
-                          <span className="text-xs text-slate-400">• {fb.displayTime}</span>
-                          <span
-                            className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
-                              fb.overallScore >= 4.5
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : fb.overallScore >= 3.0
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-rose-100 text-rose-700'
-                            }`}
-                          >
-                            {fb.overallScore >= 4.5 ? '😍' : fb.overallScore >= 3 ? '😊' : '😡'}{' '}
-                            {fb.overallScore}★
-                          </span>
-                        </div>
-
-                        <div>
-                          {isPendingAlert ? (
-                            <span className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-3 py-1 rounded-lg flex items-center gap-1 shadow animate-pulse">
-                              <span>🚩</span>
-                              <span>Damage Control</span>
-                            </span>
-                          ) : fb.status === 'RESOLVED' ? (
-                            <span className="text-emerald-600 font-bold text-xs flex items-center gap-1">
-                              <CheckCircle className="w-3.5 h-3.5" />
-                              <span>Resolved</span>
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 text-xs">View Details →</span>
-                          )}
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-slate-800 mb-2 leading-relaxed font-normal">
-                        "{fb.comment}"
-                      </p>
-
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/60 text-[11px]">
-                        <div className="flex flex-wrap gap-1">
-                          {fb.tags?.map((t, idx) => (
-                            <span
-                              key={idx}
-                              className="bg-white text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-medium"
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="text-slate-400">
-                          Barista: <strong className="text-slate-700">{fb.barista || 'Pranav'}</strong>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {filteredFeedbacks.map((fb) => (
+                  <FeedbackCard
+                    key={fb.id}
+                    fb={fb}
+                    onSelect={handleSelectFeedback}
+                  />
+                ))}
               </div>
 
             </div>
@@ -346,11 +281,11 @@ export default function AdminDashboard({
 
                 <div className="flex items-center gap-4 py-2">
                   <div className="relative w-28 h-28 shrink-0">
-                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"></circle>
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#4A90FF" stroke-width="4.5" stroke-dasharray="45 55" stroke-dashoffset="0"></circle>
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10B981" stroke-width="4.5" stroke-dasharray="35 65" stroke-dashoffset="-45"></circle>
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#FF6B6B" stroke-width="4.5" stroke-dasharray="20 80" stroke-dashoffset="-80"></circle>
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" strokeWidth="4"></circle>
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#4A90FF" strokeWidth="4.5" strokeDasharray="45 55" strokeDashoffset="0"></circle>
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10B981" strokeWidth="4.5" strokeDasharray="35 65" strokeDashoffset="-45"></circle>
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#FF6B6B" strokeWidth="4.5" strokeDasharray="20 80" strokeDashoffset="-80"></circle>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                       <span className="text-sm font-black text-slate-900">{avgRating}★</span>
@@ -453,3 +388,81 @@ export default function AdminDashboard({
     </div>
   );
 }
+
+// Optimization: Memoize FeedbackCard component to prevent unnecessary re-renders of list items when parent tab or modal states change
+const FeedbackCard = React.memo(function FeedbackCard({ fb, onSelect }) {
+  const isPendingAlert = fb.isAlert && fb.status === 'ALERT_TRIGGERED';
+  return (
+    <div
+      onClick={() => onSelect(fb)}
+      className={`p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-md ${
+        isPendingAlert
+          ? 'bg-rose-50/90 border-rose-300 ring-2 ring-rose-200'
+          : 'bg-slate-50/80 border-slate-200 hover:border-[#4A90FF]/50'
+      }`}
+    >
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-2">
+          <span
+            className={`font-black px-2.5 py-0.5 rounded-lg text-xs ${
+              isPendingAlert
+                ? 'bg-rose-600 text-white'
+                : 'bg-slate-900 text-white'
+            }`}
+          >
+            Table #{fb.table}
+          </span>
+          <span className="text-xs text-slate-400">• {fb.displayTime}</span>
+          <span
+            className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
+              fb.overallScore >= 4.5
+                ? 'bg-emerald-100 text-emerald-800'
+                : fb.overallScore >= 3.0
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-rose-100 text-rose-700'
+            }`}
+          >
+            {fb.overallScore >= 4.5 ? '😍' : fb.overallScore >= 3 ? '😊' : '😡'}{' '}
+            {fb.overallScore}★
+          </span>
+        </div>
+
+        <div>
+          {isPendingAlert ? (
+            <span className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-3 py-1 rounded-lg flex items-center gap-1 shadow animate-pulse">
+              <span>🚩</span>
+              <span>Damage Control</span>
+            </span>
+          ) : fb.status === 'RESOLVED' ? (
+            <span className="text-emerald-600 font-bold text-xs flex items-center gap-1">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Resolved</span>
+            </span>
+          ) : (
+            <span className="text-slate-400 text-xs">View Details →</span>
+          )}
+        </div>
+      </div>
+
+      <p className="text-xs text-slate-800 mb-2 leading-relaxed font-normal">
+        "{fb.comment}"
+      </p>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/60 text-[11px]">
+        <div className="flex flex-wrap gap-1">
+          {fb.tags?.map((t, idx) => (
+            <span
+              key={idx}
+              className="bg-white text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-medium"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+        <div className="text-slate-400">
+          Barista: <strong className="text-slate-700">{fb.barista || 'Pranav'}</strong>
+        </div>
+      </div>
+    </div>
+  );
+});

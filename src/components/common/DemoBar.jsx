@@ -1,6 +1,9 @@
 import React from 'react';
 import { Smartphone, LayoutDashboard, SplitSquareVertical, Zap, RefreshCw, QrCode } from 'lucide-react';
 
+// Optimization: Static array hoisted outside component to prevent array allocation on every render
+const TABLE_OPTIONS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15'];
+
 export default function DemoBar({
   currentView,
   onViewChange,
@@ -86,13 +89,11 @@ export default function DemoBar({
               onChange={(e) => onTableChange(e.target.value)}
               className="bg-transparent font-bold text-[#FFD000] text-xs focus:outline-none cursor-pointer"
             >
-              {['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15'].map(
-                (t) => (
-                  <option key={t} value={t} className="bg-slate-900 text-white">
-                    #{t}
-                  </option>
-                )
-              )}
+              {TABLE_OPTIONS.map((t) => (
+                <option key={t} value={t} className="bg-slate-900 text-white">
+                  #{t}
+                </option>
+              ))}
             </select>
           </div>
 
