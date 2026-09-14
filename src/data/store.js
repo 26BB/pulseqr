@@ -24,10 +24,34 @@ export const getStoredSettings = () => {
   }
 };
 
+// Helper to clamp numeric ratings to safe 1-5 integer bounds
+const sanitizeRating = (val) => {
+  const num = Number(val);
+  if (isNaN(num)) return 3;
+  return Math.min(5, Math.max(1, Math.round(num)));
+};
+
+// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat
+const sanitizeString = (str, maxLen = 100, fallback = "") => {
+  if (typeof str !== "string") return fallback;
+  return str.trim().slice(0, maxLen);
+};
+
 export const saveSettings = (newSettings) => {
   try {
-    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(newSettings));
-    if (channel) channel.postMessage({ type: "SETTINGS_UPDATED", payload: newSettings });
+    const sanitizedSettings = {
+      ...newSettings,
+      cafeName: sanitizeString(newSettings?.cafeName, 100, INITIAL_SETTINGS.cafeName),
+      branch: sanitizeString(newSettings?.branch, 100, INITIAL_SETTINGS.branch),
+      address: sanitizeString(newSettings?.address, 200, INITIAL_SETTINGS.address),
+      ownerName: sanitizeString(newSettings?.ownerName, 100, INITIAL_SETTINGS.ownerName),
+      ownerPhone: sanitizeString(newSettings?.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone),
+      discountCode: sanitizeString(newSettings?.discountCode, 20, INITIAL_SETTINGS.discountCode),
+      alertThreshold: Math.min(5, Math.max(1, Math.round(Number(newSettings?.alertThreshold) || 2))),
+      tableCount: Math.min(100, Math.max(1, Math.round(Number(newSettings?.tableCount) || 15))),
+    };
+    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(sanitizedSettings));
+    if (channel) channel.postMessage({ type: "SETTINGS_UPDATED", payload: sanitizedSettings });
   } catch (e) {
     console.error("Failed to save settings", e);
   }
@@ -53,19 +77,6 @@ export const saveFeedbacks = (feedbacks) => {
   } catch (e) {
     console.error("Failed to save feedbacks", e);
   }
-};
-
-// Helper to clamp numeric ratings to safe 1-5 integer bounds
-const sanitizeRating = (val) => {
-  const num = Number(val);
-  if (isNaN(num)) return 3;
-  return Math.min(5, Math.max(1, Math.round(num)));
-};
-
-// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat
-const sanitizeString = (str, maxLen = 100, fallback = "") => {
-  if (typeof str !== "string") return fallback;
-  return str.trim().slice(0, maxLen);
 };
 
 export const addFeedback = (feedbackData) => {
@@ -116,12 +127,13 @@ export const addFeedback = (feedbackData) => {
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const current = getStoredFeedbacks();
+  const safeNote = sanitizeString(note, 500, "");
   const updated = current.map((fb) => {
     if (fb.id === id) {
       return {
         ...fb,
         status: newStatus,
-        resolutionNote: note || fb.resolutionNote,
+        resolutionNote: safeNote || fb.resolutionNote,
       };
     }
     return fb;
