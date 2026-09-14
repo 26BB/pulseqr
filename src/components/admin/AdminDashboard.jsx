@@ -23,20 +23,37 @@ export default function AdminDashboard({
   const [filter, setFilter] = useState('all'); // 'all' | 'alert' | '5star'
   const [selectedFeedback, setSelectedFeedback] = useState(null);
 
-  // Performance memoization
-  const total = feedbacks.length;
-  const pendingAlerts = useMemo(
-    () => feedbacks.filter((f) => f.isAlert && f.status === 'ALERT_TRIGGERED').length,
-    [feedbacks]
-  );
-  const avgRating = useMemo(() => {
-    return (feedbacks.reduce((acc, f) => acc + f.overallScore, 0) / (total || 1)).toFixed(1);
-  }, [feedbacks, total]);
+  // Optimization: Single-pass O(N) calculation for dashboard statistics.
+  // Combines 3 separate array traversals (.filter, .reduce, .filter) and avoids intermediate array allocations.
+  const { pendingAlerts, avgRating, totalAlertsCount } = useMemo(() => {
+    const len = feedbacks.length;
+    if (!len) {
+      return { pendingAlerts: 0, avgRating: '0.0', totalAlertsCount: 0 };
+    }
 
-  const totalAlertsCount = useMemo(
-    () => feedbacks.filter((f) => f.isAlert).length,
-    [feedbacks]
-  );
+    let pending = 0;
+    let scoreSum = 0;
+    let alertsCount = 0;
+
+    for (let i = 0; i < len; i++) {
+      const f = feedbacks[i];
+      if (f.isAlert) {
+        alertsCount++;
+        if (f.status === 'ALERT_TRIGGERED') {
+          pending++;
+        }
+      }
+      scoreSum += f.overallScore || 0;
+    }
+
+    return {
+      pendingAlerts: pending,
+      avgRating: (scoreSum / len).toFixed(1),
+      totalAlertsCount: alertsCount,
+    };
+  }, [feedbacks]);
+
+  const total = feedbacks.length;
 
   const filteredFeedbacks = useMemo(() => {
     return feedbacks.filter((f) => {
