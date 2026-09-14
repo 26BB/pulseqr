@@ -294,8 +294,10 @@ export default function DinerView({ table = '04', onSubmitFeedback, settings }) 
 
                 {/* Comment */}
                 <div className="mb-3">
+                  {/* Security: Enforce input length limit to prevent excessive payload / LocalStorage DoS */}
                   <input
                     type="text"
+                    maxLength={500}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Optional note for Rohan & team..."
