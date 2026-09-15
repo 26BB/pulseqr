@@ -122,7 +122,8 @@ export const addFeedback = (feedbackData) => {
 
   const updated = [newEntry, ...current];
   saveFeedbacks(updated);
-  return newEntry;
+  // Optimization: Return the updated array to avoid synchronous localStorage re-reading and JSON.parse in callers
+  return updated;
 };
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
