@@ -80,8 +80,10 @@ export default function App() {
 
   // Actions
   const handleFeedbackSubmit = (data) => {
-    addFeedback(data);
-    setFeedbacks(getStoredFeedbacks());
+    // Optimization: addFeedback returns the updated feedback array already in memory,
+    // avoiding a synchronous localStorage read and JSON.parse.
+    const updated = addFeedback(data);
+    setFeedbacks(updated);
   };
 
   const handleResolveFeedback = (id, newStatus, note) => {
@@ -101,8 +103,9 @@ export default function App() {
   };
 
   const handleSimulateFeedback = () => {
-    generateRandomDemoFeedback();
-    setFeedbacks(getStoredFeedbacks());
+    // Optimization: generateRandomDemoFeedback returns the updated feedback array already in memory.
+    const updated = generateRandomDemoFeedback();
+    setFeedbacks(updated);
   };
 
   // Optimization: Memoize pending alert count calculation to prevent array re-filtering
