@@ -36,6 +36,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
             </h3>
           </div>
 
+          {/* Security: Enforce frontend input length limits (maxLength) to prevent LocalStorage DoS / bloat */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -43,6 +44,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
               </label>
               <input
                 type="text"
+                maxLength={100}
                 value={formData.cafeName}
                 onChange={(e) => handleChange('cafeName', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
@@ -55,6 +57,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
               </label>
               <input
                 type="text"
+                maxLength={100}
                 value={formData.branch}
                 onChange={(e) => handleChange('branch', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
@@ -67,6 +70,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
               </label>
               <input
                 type="text"
+                maxLength={200}
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
@@ -79,6 +83,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
               </label>
               <input
                 type="text"
+                maxLength={100}
                 value={formData.ownerName}
                 onChange={(e) => handleChange('ownerName', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
@@ -123,6 +128,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
                 </label>
                 <input
                   type="text"
+                  maxLength={30}
                   value={formData.ownerPhone}
                   onChange={(e) => handleChange('ownerPhone', e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
@@ -179,6 +185,7 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
               </label>
               <input
                 type="text"
+                maxLength={20}
                 value={formData.discountCode}
                 onChange={(e) => handleChange('discountCode', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-[#1E60FF] focus:outline-none"
