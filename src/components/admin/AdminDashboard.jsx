@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import AnalyticsView from './AnalyticsView';
 import SettingsView from './SettingsView';
 import FeedbackDetailModal from './FeedbackDetailModal';
@@ -11,7 +11,8 @@ import {
   QrCode,
 } from 'lucide-react';
 
-export default function AdminDashboard({
+// Optimization: Memoize AdminDashboard to prevent re-rendering when parent App re-renders (e.g. table parameter change, modal toggles) unless props change
+const AdminDashboard = memo(function AdminDashboard({
   feedbacks,
   settings,
   onResolveFeedback,
@@ -398,7 +399,9 @@ export default function AdminDashboard({
 
     </div>
   );
-}
+});
+
+export default AdminDashboard;
 
 // Optimization: Memoize FeedbackCard component to prevent unnecessary re-renders of list items when parent tab or modal states change
 const FeedbackCard = React.memo(function FeedbackCard({ fb, onSelect }) {
