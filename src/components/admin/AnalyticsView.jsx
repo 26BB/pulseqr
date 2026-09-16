@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { FUNNEL_STATS, POPULAR_TAGS, BARISTAS } from '../../data/mockData';
 import { Star } from 'lucide-react';
 
-export default function AnalyticsView({ feedbacks }) {
+// Optimization: Wrap AnalyticsView in React.memo to prevent re-renders when parent state changes (e.g. modal toggle, filter selection) while feedbacks remains unchanged
+const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
   // Optimization: Single-pass O(N) calculation memoized with useMemo instead of running 3 separate .reduce() passes
   const { avgFood, avgService, avgAmbiance } = useMemo(() => {
     const total = feedbacks.length;
@@ -196,4 +197,6 @@ export default function AnalyticsView({ feedbacks }) {
 
     </div>
   );
-}
+});
+
+export default AnalyticsView;

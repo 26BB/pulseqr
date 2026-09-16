@@ -19,7 +19,11 @@ export default function App() {
   // Read URL query parameters
   const urlParams = new URLSearchParams(window.location.search);
   const initialViewParam = urlParams.get('view') || 'split';
-  const initialTableParam = urlParams.get('table') || '04';
+  const rawTableParam = urlParams.get('table') || '04';
+  // Security: Sanitize table parameter from URL to prevent unwanted input or injection
+  const initialTableParam = typeof rawTableParam === 'string'
+    ? rawTableParam.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
+    : '04';
 
   const [currentView, setCurrentView] = useState(initialViewParam);
   const [currentTable, setCurrentTable] = useState(initialTableParam);
@@ -35,7 +39,10 @@ export default function App() {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('view')) setCurrentView(params.get('view'));
-      if (params.get('table')) setCurrentTable(params.get('table'));
+      if (params.get('table')) {
+        const safeTable = params.get('table').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04';
+        setCurrentTable(safeTable);
+      }
     };
     window.addEventListener('popstate', handlePopState);
 
@@ -73,8 +80,10 @@ export default function App() {
 
   // Actions
   const handleFeedbackSubmit = (data) => {
-    addFeedback(data);
-    setFeedbacks(getStoredFeedbacks());
+    // Optimization: addFeedback returns the updated feedback array already in memory,
+    // avoiding a synchronous localStorage read and JSON.parse.
+    const updated = addFeedback(data);
+    setFeedbacks(updated);
   };
 
   const handleResolveFeedback = (id, newStatus, note) => {
@@ -94,8 +103,9 @@ export default function App() {
   };
 
   const handleSimulateFeedback = () => {
-    generateRandomDemoFeedback();
-    setFeedbacks(getStoredFeedbacks());
+    // Optimization: generateRandomDemoFeedback returns the updated feedback array already in memory.
+    const updated = generateRandomDemoFeedback();
+    setFeedbacks(updated);
   };
 
   // Optimization: Memoize pending alert count calculation to prevent array re-filtering

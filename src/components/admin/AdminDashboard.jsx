@@ -25,35 +25,34 @@ export default function AdminDashboard({
 
   // Optimization: Single-pass O(N) calculation for dashboard statistics.
   // Combines 3 separate array traversals (.filter, .reduce, .filter) and avoids intermediate array allocations.
-  const { pendingAlerts, avgRating, totalAlertsCount } = useMemo(() => {
-    const len = feedbacks.length;
-    if (!len) {
-      return { pendingAlerts: 0, avgRating: '0.0', totalAlertsCount: 0 };
+  const { total, pendingAlerts, avgRating, totalAlertsCount } = useMemo(() => {
+    const totalCount = feedbacks.length;
+    if (!totalCount) {
+      return { total: 0, pendingAlerts: 0, avgRating: '0.0', totalAlertsCount: 0 };
     }
 
     let pending = 0;
+    let alerts = 0;
     let scoreSum = 0;
-    let alertsCount = 0;
 
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < totalCount; i++) {
       const f = feedbacks[i];
+      scoreSum += f.overallScore || 0;
       if (f.isAlert) {
-        alertsCount++;
+        alerts++;
         if (f.status === 'ALERT_TRIGGERED') {
           pending++;
         }
       }
-      scoreSum += f.overallScore || 0;
     }
 
     return {
+      total: totalCount,
       pendingAlerts: pending,
-      avgRating: (scoreSum / len).toFixed(1),
-      totalAlertsCount: alertsCount,
+      avgRating: (scoreSum / totalCount).toFixed(1),
+      totalAlertsCount: alerts,
     };
   }, [feedbacks]);
-
-  const total = feedbacks.length;
 
   const filteredFeedbacks = useMemo(() => {
     return feedbacks.filter((f) => {
