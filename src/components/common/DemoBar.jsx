@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Smartphone, LayoutDashboard, SplitSquareVertical, Zap, RefreshCw, QrCode } from 'lucide-react';
 
 // Optimization: Static array hoisted outside component to prevent array allocation on every render
 const TABLE_OPTIONS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15'];
 
-export default function DemoBar({
+// Optimization: Memoize DemoBar to prevent re-rendering when parent App state changes unless props actually change
+const DemoBar = memo(function DemoBar({
   currentView,
   onViewChange,
   currentTable,
@@ -140,4 +141,6 @@ export default function DemoBar({
       </div>
     </header>
   );
-}
+});
+
+export default DemoBar;

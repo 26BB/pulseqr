@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DemoBar from './components/common/DemoBar';
 import DinerView from './components/diner/DinerView';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -64,49 +64,56 @@ export default function App() {
   }, []);
 
   // Sync URL when view or table changes
-  const handleViewChange = (newView) => {
+  // Optimization: Memoize handlers with useCallback so child components wrapped in React.memo (DemoBar, DinerView, AdminDashboard)
+  // don't re-render on unrelated state updates (e.g. modal toggle, real-time sync).
+  const handleViewChange = useCallback((newView) => {
     setCurrentView(newView);
     const url = new URL(window.location);
     url.searchParams.set('view', newView);
     window.history.replaceState({}, '', url);
-  };
+  }, []);
 
-  const handleTableChange = (newTable) => {
+  const handleTableChange = useCallback((newTable) => {
     setCurrentTable(newTable);
     const url = new URL(window.location);
     url.searchParams.set('table', newTable);
     window.history.replaceState({}, '', url);
-  };
+  }, []);
 
   // Actions
-  const handleFeedbackSubmit = (data) => {
+  const handleFeedbackSubmit = useCallback((data) => {
     // Optimization: addFeedback returns the updated feedback array already in memory,
     // avoiding a synchronous localStorage read and JSON.parse.
     const updated = addFeedback(data);
     setFeedbacks(updated);
-  };
+  }, []);
 
-  const handleResolveFeedback = (id, newStatus, note) => {
+  const handleResolveFeedback = useCallback((id, newStatus, note) => {
     const updated = updateFeedbackStatus(id, newStatus, note);
     setFeedbacks(updated);
-  };
+  }, []);
 
-  const handleSaveSettings = (newSettings) => {
+  const handleSaveSettings = useCallback((newSettings) => {
     saveSettings(newSettings);
     setSettings(newSettings);
-  };
+  }, []);
 
-  const handleResetData = () => {
+  const handleResetData = useCallback(() => {
     const { feedbacks: newFbs, settings: newSets } = resetToSeedData();
     setFeedbacks(newFbs);
     setSettings(newSets);
-  };
+  }, []);
 
-  const handleSimulateFeedback = () => {
+  const handleSimulateFeedback = useCallback(() => {
     // Optimization: generateRandomDemoFeedback returns the updated feedback array already in memory.
     const updated = generateRandomDemoFeedback();
     setFeedbacks(updated);
-  };
+  }, []);
+
+  const handleOpenStandee = useCallback(() => setStandeesModalOpen(true), []);
+  const handleOpenDocs = useCallback(() => setDocsModalOpen(true), []);
+  const handleCloseStandee = useCallback(() => setStandeesModalOpen(false), []);
+  const handleCloseDocs = useCallback(() => setDocsModalOpen(false), []);
 
   // Optimization: Memoize pending alert count calculation to prevent array re-filtering
   // during unrelated re-renders (e.g. view switching, table selection, modal state toggles).
@@ -127,8 +134,8 @@ export default function App() {
         onSimulateFeedback={handleSimulateFeedback}
         onResetData={handleResetData}
         alertCount={pendingAlertCount}
-        onOpenStandee={() => setStandeesModalOpen(true)}
-        onOpenDocs={() => setDocsModalOpen(true)}
+        onOpenStandee={handleOpenStandee}
+        onOpenDocs={handleOpenDocs}
       />
 
       {/* Main Content Area */}
@@ -150,7 +157,7 @@ export default function App() {
             onResolveFeedback={handleResolveFeedback}
             onSaveSettings={handleSaveSettings}
             onResetData={handleResetData}
-            onOpenStandees={() => setStandeesModalOpen(true)}
+              onOpenStandees={handleOpenStandee}
           />
         )}
 
@@ -183,7 +190,7 @@ export default function App() {
                 onResolveFeedback={handleResolveFeedback}
                 onSaveSettings={handleSaveSettings}
                 onResetData={handleResetData}
-                onOpenStandees={() => setStandeesModalOpen(true)}
+                onOpenStandees={handleOpenStandee}
               />
             </div>
           </div>
@@ -194,13 +201,13 @@ export default function App() {
       {standeesModalOpen && (
         <QrStandeeGenerator
           settings={settings}
-          onClose={() => setStandeesModalOpen(false)}
+          onClose={handleCloseStandee}
         />
       )}
 
       {/* PM Documentation & Case Study Reader Modal */}
       {docsModalOpen && (
-        <PmDocsModal onClose={() => setDocsModalOpen(false)} />
+        <PmDocsModal onClose={handleCloseDocs} />
       )}
 
       {/* Bottom Subtle Status Tag */}

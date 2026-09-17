@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import confetti from 'canvas-confetti';
 import { ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 
@@ -21,7 +21,8 @@ const PRESET_TAGS = [
   'Slow Service ⏰',
 ];
 
-export default function DinerView({ table = '04', onSubmitFeedback, settings }) {
+// Optimization: Memoize DinerView to skip re-renders when parent App state updates (e.g. feedback array sync, demo bar clicks)
+const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, settings }) {
   const [step, setStep] = useState('welcome'); // 'welcome' | 'form' | 'success'
   const [ratings, setRatings] = useState({ food: 5, service: 5, ambiance: 4 });
   const [selectedTags, setSelectedTags] = useState([]);
@@ -388,4 +389,6 @@ export default function DinerView({ table = '04', onSubmitFeedback, settings }) 
       </div>
     </div>
   );
-}
+});
+
+export default DinerView;
