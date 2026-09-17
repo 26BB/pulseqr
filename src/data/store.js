@@ -64,7 +64,8 @@ export const getStoredFeedbacks = () => {
       localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(INITIAL_FEEDBACKS));
       return INITIAL_FEEDBACKS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : INITIAL_FEEDBACKS;
   } catch {
     return INITIAL_FEEDBACKS;
   }
@@ -126,14 +127,17 @@ export const addFeedback = (feedbackData) => {
   return updated;
 };
 
+const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
+
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const current = getStoredFeedbacks();
   const safeNote = sanitizeString(note, 500, "");
+  const safeStatus = VALID_STATUSES.includes(newStatus) ? newStatus : "ACKNOWLEDGED";
   const updated = current.map((fb) => {
     if (fb.id === id) {
       return {
         ...fb,
-        status: newStatus,
+        status: safeStatus,
         resolutionNote: safeNote || fb.resolutionNote,
       };
     }
@@ -159,7 +163,12 @@ export const subscribeToRealtime = (callback) => {
 
   const handleStorage = (event) => {
     if (event.key === STORAGE_KEY_FEEDBACKS) {
-      callback({ type: "FEEDBACKS_UPDATED", payload: JSON.parse(event.newValue || "[]") });
+      try {
+        const parsed = JSON.parse(event.newValue || "[]");
+        callback({ type: "FEEDBACKS_UPDATED", payload: Array.isArray(parsed) ? parsed : [] });
+      } catch {
+        callback({ type: "FEEDBACKS_UPDATED", payload: [] });
+      }
     }
   };
 
