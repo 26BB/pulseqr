@@ -115,12 +115,18 @@ export default function App() {
   const handleCloseStandee = useCallback(() => setStandeesModalOpen(false), []);
   const handleCloseDocs = useCallback(() => setDocsModalOpen(false), []);
 
-  // Optimization: Memoize pending alert count calculation to prevent array re-filtering
-  // during unrelated re-renders (e.g. view switching, table selection, modal state toggles).
-  const pendingAlertCount = useMemo(
-    () => feedbacks.filter((f) => f.isAlert && f.status === 'ALERT_TRIGGERED').length,
-    [feedbacks]
-  );
+  // Optimization: Single-pass O(N) loop in useMemo avoids intermediate array allocation
+  // from feedbacks.filter() when computing pending alert count.
+  const pendingAlertCount = useMemo(() => {
+    let count = 0;
+    for (let i = 0; i < feedbacks.length; i++) {
+      const f = feedbacks[i];
+      if (f.isAlert && f.status === 'ALERT_TRIGGERED') {
+        count++;
+      }
+    }
+    return count;
+  }, [feedbacks]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
