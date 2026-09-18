@@ -16,17 +16,22 @@ import {
 } from './data/store';
 
 export default function App() {
-  // Read URL query parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialViewParam = urlParams.get('view') || 'split';
-  const rawTableParam = urlParams.get('table') || '04';
-  // Security: Sanitize table parameter from URL to prevent unwanted input or injection
-  const initialTableParam = typeof rawTableParam === 'string'
-    ? rawTableParam.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
-    : '04';
+  // Optimization: Lazy state initializers prevent URL query parameter parsing and regex
+  // sanitization from executing synchronously on every re-render of the root App component.
+  const [currentView, setCurrentView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') || 'split';
+  });
 
-  const [currentView, setCurrentView] = useState(initialViewParam);
-  const [currentTable, setCurrentTable] = useState(initialTableParam);
+  const [currentTable, setCurrentTable] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rawTableParam = params.get('table') || '04';
+    // Security: Sanitize table parameter from URL to prevent unwanted input or injection
+    return typeof rawTableParam === 'string'
+      ? rawTableParam.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
+      : '04';
+  });
+
   // Optimization: Lazy state initialization avoids executing synchronous localStorage.getItem
   // and JSON.parse on every re-render of the root App component.
   const [feedbacks, setFeedbacks] = useState(getStoredFeedbacks);
