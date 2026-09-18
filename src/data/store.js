@@ -18,7 +18,18 @@ export const getStoredSettings = () => {
       localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(INITIAL_SETTINGS));
       return INITIAL_SETTINGS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return INITIAL_SETTINGS;
+    return {
+      cafeName: sanitizeString(parsed.cafeName, 100, INITIAL_SETTINGS.cafeName),
+      branch: sanitizeString(parsed.branch, 100, INITIAL_SETTINGS.branch),
+      address: sanitizeString(parsed.address, 200, INITIAL_SETTINGS.address),
+      ownerName: sanitizeString(parsed.ownerName, 100, INITIAL_SETTINGS.ownerName),
+      ownerPhone: sanitizeString(parsed.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone),
+      discountCode: sanitizeString(parsed.discountCode, 20, INITIAL_SETTINGS.discountCode),
+      alertThreshold: Math.min(5, Math.max(1, Math.round(Number(parsed.alertThreshold) || 2))),
+      tableCount: Math.min(100, Math.max(1, Math.round(Number(parsed.tableCount) || 15))),
+    };
   } catch {
     return INITIAL_SETTINGS;
   }
@@ -65,7 +76,17 @@ export const getStoredFeedbacks = () => {
       return INITIAL_FEEDBACKS;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : INITIAL_FEEDBACKS;
+    if (!Array.isArray(parsed)) return INITIAL_FEEDBACKS;
+
+    // Validate each feedback item shape (Security: Input Validation for untrusted localStorage)
+    return parsed.filter(
+      (fb) =>
+        fb &&
+        typeof fb === "object" &&
+        typeof fb.id === "string" &&
+        fb.ratings &&
+        typeof fb.ratings === "object"
+    );
   } catch {
     return INITIAL_FEEDBACKS;
   }
