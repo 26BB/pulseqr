@@ -24,21 +24,25 @@ const AdminDashboard = memo(function AdminDashboard({
   const [filter, setFilter] = useState('all'); // 'all' | 'alert' | '5star'
   const [selectedFeedback, setSelectedFeedback] = useState(null);
 
-  // Optimization: Single-pass O(N) calculation for dashboard statistics.
-  // Combines 3 separate array traversals (.filter, .reduce, .filter) and avoids intermediate array allocations.
-  const { total, pendingAlerts, avgRating, totalAlertsCount } = useMemo(() => {
+  // Optimization: Consolidate overall stats and category averages calculation into a single-pass O(N) loop
+  // instead of multiple filter/reduce passes & array allocations.
+  const { total, pendingAlerts, avgRating, totalAlertsCount, avgFood, avgService, avgAmbiance } = useMemo(() => {
     const totalCount = feedbacks.length;
-    if (!totalCount) {
-      return { total: 0, pendingAlerts: 0, avgRating: '0.0', totalAlertsCount: 0 };
-    }
-
     let pending = 0;
     let alerts = 0;
     let scoreSum = 0;
+    let foodSum = 0;
+    let serviceSum = 0;
+    let ambianceSum = 0;
 
     for (let i = 0; i < totalCount; i++) {
       const f = feedbacks[i];
-      scoreSum += f.overallScore || 0;
+      scoreSum += f.overallScore;
+      if (f.ratings) {
+        foodSum += f.ratings.food || 0;
+        serviceSum += f.ratings.service || 0;
+        ambianceSum += f.ratings.ambiance || 0;
+      }
       if (f.isAlert) {
         alerts++;
         if (f.status === 'ALERT_TRIGGERED') {
@@ -47,11 +51,16 @@ const AdminDashboard = memo(function AdminDashboard({
       }
     }
 
+    const divisor = totalCount || 1;
+
     return {
       total: totalCount,
       pendingAlerts: pending,
-      avgRating: (scoreSum / totalCount).toFixed(1),
+      avgRating: (scoreSum / divisor).toFixed(1),
       totalAlertsCount: alerts,
+      avgFood: (foodSum / divisor).toFixed(1),
+      avgService: (serviceSum / divisor).toFixed(1),
+      avgAmbiance: (ambianceSum / divisor).toFixed(1),
     };
   }, [feedbacks]);
 
@@ -315,19 +324,19 @@ const AdminDashboard = memo(function AdminDashboard({
                       <span className="flex items-center gap-1.5 font-bold text-slate-700">
                         <span className="w-2.5 h-2.5 rounded-full bg-[#4A90FF]"></span> Food
                       </span>
-                      <span className="font-black text-[#4A90FF]">4.4★ (45%)</span>
+                      <span className="font-black text-[#4A90FF]">{avgFood}★</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5 font-bold text-slate-700">
                         <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span> Service
                       </span>
-                      <span className="font-black text-[#10B981]">4.6★ (35%)</span>
+                      <span className="font-black text-[#10B981]">{avgService}★</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5 font-bold text-slate-700">
                         <span className="w-2.5 h-2.5 rounded-full bg-[#FF6B6B]"></span> Ambiance
                       </span>
-                      <span className="font-black text-[#FF6B6B]">3.8★ (20%)</span>
+                      <span className="font-black text-[#FF6B4A]">{avgAmbiance}★</span>
                     </div>
                   </div>
                 </div>

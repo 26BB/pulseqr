@@ -16,17 +16,22 @@ import {
 } from './data/store';
 
 export default function App() {
-  // Read URL query parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialViewParam = urlParams.get('view') || 'split';
-  const rawTableParam = urlParams.get('table') || '04';
-  // Security: Sanitize table parameter from URL to prevent unwanted input or injection
-  const initialTableParam = typeof rawTableParam === 'string'
-    ? rawTableParam.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
-    : '04';
+  // Optimization: Lazy state initializers prevent URL query parameter parsing and regex
+  // sanitization from executing synchronously on every re-render of the root App component.
+  const [currentView, setCurrentView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') || 'split';
+  });
 
-  const [currentView, setCurrentView] = useState(initialViewParam);
-  const [currentTable, setCurrentTable] = useState(initialTableParam);
+  const [currentTable, setCurrentTable] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rawTableParam = params.get('table') || '04';
+    // Security: Sanitize table parameter from URL to prevent unwanted input or injection
+    return typeof rawTableParam === 'string'
+      ? rawTableParam.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
+      : '04';
+  });
+
   // Optimization: Lazy state initialization avoids executing synchronous localStorage.getItem
   // and JSON.parse on every re-render of the root App component.
   const [feedbacks, setFeedbacks] = useState(getStoredFeedbacks);
@@ -115,12 +120,18 @@ export default function App() {
   const handleCloseStandee = useCallback(() => setStandeesModalOpen(false), []);
   const handleCloseDocs = useCallback(() => setDocsModalOpen(false), []);
 
-  // Optimization: Memoize pending alert count calculation to prevent array re-filtering
-  // during unrelated re-renders (e.g. view switching, table selection, modal state toggles).
-  const pendingAlertCount = useMemo(
-    () => feedbacks.filter((f) => f.isAlert && f.status === 'ALERT_TRIGGERED').length,
-    [feedbacks]
-  );
+  // Optimization: Single-pass O(N) loop in useMemo avoids intermediate array allocation
+  // from feedbacks.filter() when computing pending alert count.
+  const pendingAlertCount = useMemo(() => {
+    let count = 0;
+    for (let i = 0; i < feedbacks.length; i++) {
+      const f = feedbacks[i];
+      if (f.isAlert && f.status === 'ALERT_TRIGGERED') {
+        count++;
+      }
+    }
+    return count;
+  }, [feedbacks]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">

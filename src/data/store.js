@@ -11,19 +11,6 @@ try {
   console.warn("BroadcastChannel not supported in this browser environment", e);
 }
 
-export const getStoredSettings = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(INITIAL_SETTINGS));
-      return INITIAL_SETTINGS;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return INITIAL_SETTINGS;
-  }
-};
-
 // Helper to clamp numeric ratings to safe 1-5 integer bounds
 const sanitizeRating = (val) => {
   const num = Number(val);
@@ -37,19 +24,51 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
   return str.trim().slice(0, maxLen);
 };
 
+// Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
+const sanitizeSettings = (obj) => {
+  if (!obj || typeof obj !== "object") return INITIAL_SETTINGS;
+  return {
+    cafeName: sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName),
+    branch: sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch),
+    address: sanitizeString(obj.address, 200, INITIAL_SETTINGS.address),
+    ownerName: sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName),
+    ownerPhone: sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone),
+    discountCode: sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode),
+    alertThreshold: Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2))),
+    tableCount: Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15))),
+  };
+};
+
+// Helper to validate each feedback item shape (Security: Input Validation for untrusted BroadcastChannel / storage events)
+const sanitizeFeedbackArray = (arr) => {
+  if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
+  return arr.filter(
+    (fb) =>
+      fb &&
+      typeof fb === "object" &&
+      typeof fb.id === "string" &&
+      fb.ratings &&
+      typeof fb.ratings === "object"
+  );
+};
+
+export const getStoredSettings = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(INITIAL_SETTINGS));
+      return INITIAL_SETTINGS;
+    }
+    const parsed = JSON.parse(raw);
+    return sanitizeSettings(parsed);
+  } catch {
+    return INITIAL_SETTINGS;
+  }
+};
+
 export const saveSettings = (newSettings) => {
   try {
-    const sanitizedSettings = {
-      ...newSettings,
-      cafeName: sanitizeString(newSettings?.cafeName, 100, INITIAL_SETTINGS.cafeName),
-      branch: sanitizeString(newSettings?.branch, 100, INITIAL_SETTINGS.branch),
-      address: sanitizeString(newSettings?.address, 200, INITIAL_SETTINGS.address),
-      ownerName: sanitizeString(newSettings?.ownerName, 100, INITIAL_SETTINGS.ownerName),
-      ownerPhone: sanitizeString(newSettings?.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone),
-      discountCode: sanitizeString(newSettings?.discountCode, 20, INITIAL_SETTINGS.discountCode),
-      alertThreshold: Math.min(5, Math.max(1, Math.round(Number(newSettings?.alertThreshold) || 2))),
-      tableCount: Math.min(100, Math.max(1, Math.round(Number(newSettings?.tableCount) || 15))),
-    };
+    const sanitizedSettings = sanitizeSettings(newSettings);
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(sanitizedSettings));
     if (channel) channel.postMessage({ type: "SETTINGS_UPDATED", payload: sanitizedSettings });
   } catch (e) {
@@ -65,7 +84,7 @@ export const getStoredFeedbacks = () => {
       return INITIAL_FEEDBACKS;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : INITIAL_FEEDBACKS;
+    return sanitizeFeedbackArray(parsed);
   } catch {
     return INITIAL_FEEDBACKS;
   }
@@ -156,8 +175,15 @@ export const resetToSeedData = () => {
 
 export const subscribeToRealtime = (callback) => {
   const handleMessage = (event) => {
-    if (event.data) {
-      callback(event.data);
+    if (event?.data && typeof event.data === "object") {
+      const { type, payload } = event.data;
+      if (type === "FEEDBACKS_UPDATED") {
+        callback({ type, payload: sanitizeFeedbackArray(payload) });
+      } else if (type === "SETTINGS_UPDATED") {
+        callback({ type, payload: sanitizeSettings(payload) });
+      } else if (type === "RESET_ALL") {
+        callback({ type });
+      }
     }
   };
 
@@ -165,9 +191,16 @@ export const subscribeToRealtime = (callback) => {
     if (event.key === STORAGE_KEY_FEEDBACKS) {
       try {
         const parsed = JSON.parse(event.newValue || "[]");
-        callback({ type: "FEEDBACKS_UPDATED", payload: Array.isArray(parsed) ? parsed : [] });
+        callback({ type: "FEEDBACKS_UPDATED", payload: sanitizeFeedbackArray(parsed) });
       } catch {
         callback({ type: "FEEDBACKS_UPDATED", payload: [] });
+      }
+    } else if (event.key === STORAGE_KEY_SETTINGS) {
+      try {
+        const parsed = JSON.parse(event.newValue || "{}");
+        callback({ type: "SETTINGS_UPDATED", payload: sanitizeSettings(parsed) });
+      } catch {
+        callback({ type: "SETTINGS_UPDATED", payload: INITIAL_SETTINGS });
       }
     }
   };
