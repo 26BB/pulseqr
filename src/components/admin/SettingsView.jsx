@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Save, MessageSquare, ShieldAlert, Coffee, RotateCcw, Check } from 'lucide-react';
 
-export default function SettingsView({ settings, onSaveSettings, onResetData }) {
+// Optimization: Memoize SettingsView to prevent re-renders when parent state (e.g., feedbacks) updates while settings tab is active
+const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onResetData }) {
   const [formData, setFormData] = useState({ ...settings });
   const [saved, setSaved] = useState(false);
 
@@ -238,4 +239,6 @@ export default function SettingsView({ settings, onSaveSettings, onResetData }) 
       </form>
     </div>
   );
-}
+});
+
+export default SettingsView;

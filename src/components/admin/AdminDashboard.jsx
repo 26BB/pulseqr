@@ -72,10 +72,19 @@ const AdminDashboard = memo(function AdminDashboard({
     });
   }, [feedbacks, filter]);
 
-  // Optimization: Memoize feedback selection callback so FeedbackCard child components don't re-render when parent state changes
+  // Optimization: Memoize feedback selection and modal callbacks so child components don't re-render unnecessarily
   const handleSelectFeedback = useCallback((fb) => {
     setSelectedFeedback(fb);
   }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedFeedback(null);
+  }, []);
+
+  const handleResolveModal = useCallback((id, newStatus, note) => {
+    onResolveFeedback(id, newStatus, note);
+    setSelectedFeedback(null);
+  }, [onResolveFeedback]);
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6">
@@ -403,11 +412,8 @@ const AdminDashboard = memo(function AdminDashboard({
         <FeedbackDetailModal
           feedback={selectedFeedback}
           settings={settings}
-          onClose={() => setSelectedFeedback(null)}
-          onResolve={(id, newStatus, note) => {
-            onResolveFeedback(id, newStatus, note);
-            setSelectedFeedback(null);
-          }}
+          onClose={handleCloseModal}
+          onResolve={handleResolveModal}
         />
       )}
 
