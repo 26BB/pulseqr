@@ -15,12 +15,17 @@ import {
   generateRandomDemoFeedback,
 } from './data/store';
 
+const VALID_VIEWS = ['diner', 'admin', 'split'];
+
+// Security: Validate and sanitize view query parameter against allowlist to prevent application broken state / UI DoS
+const sanitizeView = (view) => (VALID_VIEWS.includes(view) ? view : 'split');
+
 export default function App() {
   // Optimization: Lazy state initializers prevent URL query parameter parsing and regex
   // sanitization from executing synchronously on every re-render of the root App component.
   const [currentView, setCurrentView] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('view') || 'split';
+    return sanitizeView(params.get('view'));
   });
 
   const [currentTable, setCurrentTable] = useState(() => {
@@ -43,7 +48,7 @@ export default function App() {
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('view')) setCurrentView(params.get('view'));
+      if (params.get('view')) setCurrentView(sanitizeView(params.get('view')));
       if (params.get('table')) {
         const safeTable = params.get('table').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04';
         setCurrentTable(safeTable);
@@ -72,9 +77,10 @@ export default function App() {
   // Optimization: Memoize handlers with useCallback so child components wrapped in React.memo (DemoBar, DinerView, AdminDashboard)
   // don't re-render on unrelated state updates (e.g. modal toggle, real-time sync).
   const handleViewChange = useCallback((newView) => {
-    setCurrentView(newView);
+    const safeView = sanitizeView(newView);
+    setCurrentView(safeView);
     const url = new URL(window.location);
-    url.searchParams.set('view', newView);
+    url.searchParams.set('view', safeView);
     window.history.replaceState({}, '', url);
   }, []);
 
