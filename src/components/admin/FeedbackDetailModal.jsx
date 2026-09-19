@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Clock, User, Coffee } from 'lucide-react';
 
-export default function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
+// Optimization: Memoize FeedbackDetailModal to prevent unnecessary re-renders when parent state updates while viewing modal details
+const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
   const [note, setNote] = useState('');
   if (!feedback) return null;
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
@@ -179,4 +180,6 @@ export default function FeedbackDetailModal({ feedback, onClose, onResolve, sett
       </div>
     </div>
   );
-}
+});
+
+export default FeedbackDetailModal;

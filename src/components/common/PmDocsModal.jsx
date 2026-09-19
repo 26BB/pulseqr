@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { X, Target, Users, Rocket, BarChart2, ShieldCheck, CheckSquare, FileText } from 'lucide-react';
 
 const DOCS_LIST = [
@@ -110,7 +110,8 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
   }
 ];
 
-export default function PmDocsModal({ onClose }) {
+// Optimization: Memoize PmDocsModal to prevent unnecessary re-renders when parent state updates while documentation modal is open
+const PmDocsModal = memo(function PmDocsModal({ onClose }) {
   const [activeDocId, setActiveDocId] = useState('prd');
   const activeDoc = DOCS_LIST.find((d) => d.id === activeDocId) || DOCS_LIST[0];
 
@@ -216,4 +217,6 @@ export default function PmDocsModal({ onClose }) {
       </div>
     </div>
   );
-}
+});
+
+export default PmDocsModal;
