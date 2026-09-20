@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Printer, Download, ShieldCheck } from 'lucide-react';
 
-export default function QrStandeeGenerator({ onClose, settings }) {
+// Optimization: Memoize QrStandeeGenerator to prevent unnecessary re-renders when parent state updates while standee modal is open
+const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
   const totalTables = settings?.tableCount || 15;
 
@@ -152,4 +153,6 @@ export default function QrStandeeGenerator({ onClose, settings }) {
       </div>
     </div>
   );
-}
+});
+
+export default QrStandeeGenerator;
