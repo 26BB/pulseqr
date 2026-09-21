@@ -76,10 +76,11 @@ const sanitizeFeedbackItem = (fb) => {
   };
 };
 
-// Helper to validate each feedback item shape (Security: Input Validation for untrusted BroadcastChannel / storage events)
+// Helper to validate each feedback item shape (Security: Input Validation & DoS prevention for untrusted BroadcastChannel / storage events)
 const sanitizeFeedbackArray = (arr) => {
   if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
-  return arr.map(sanitizeFeedbackItem).filter(Boolean);
+  // Truncate array length to 100 to prevent LocalStorage / BroadcastChannel DoS (Uncontrolled Resource Consumption)
+  return arr.slice(0, 100).map(sanitizeFeedbackItem).filter(Boolean);
 };
 
 export const getStoredSettings = () => {
@@ -156,7 +157,7 @@ export const addFeedback = (feedbackData) => {
     : [];
 
   const newEntry = {
-    id: `fb-${Date.now().toString().slice(-4)}`,
+    id: `fb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     table: sanitizeString(feedbackData?.table, 10, "04") || "04",
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
