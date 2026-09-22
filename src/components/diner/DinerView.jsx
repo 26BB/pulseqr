@@ -1,5 +1,4 @@
 import React, { useState, memo } from 'react';
-import confetti from 'canvas-confetti';
 import { ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 
 const EMOJIS = [
@@ -59,16 +58,21 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
     });
 
     if (!isAlert) {
-      try {
-        confetti({
-          particleCount: 85,
-          spread: 75,
-          origin: { y: 0.6 },
-          colors: ['#FF6B4A', '#FFD700', '#10B981', '#ffffff'],
+      // Optimization: Dynamically import canvas-confetti on demand when positive feedback is submitted,
+      // code-splitting it out of the initial JS bundle to speed up page load time.
+      import('canvas-confetti')
+        .then((module) => {
+          const confetti = module.default;
+          confetti({
+            particleCount: 85,
+            spread: 75,
+            origin: { y: 0.6 },
+            colors: ['#FF6B4A', '#FFD700', '#10B981', '#ffffff'],
+          });
+        })
+        .catch((err) => {
+          console.log('Confetti effect', err);
         });
-      } catch (err) {
-        console.log('Confetti effect', err);
-      }
     }
 
     setStep('success');
