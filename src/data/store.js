@@ -123,10 +123,13 @@ export const getStoredFeedbacks = () => {
 
 export const saveFeedbacks = (feedbacks) => {
   try {
-    localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(feedbacks));
-    if (channel) channel.postMessage({ type: "FEEDBACKS_UPDATED", payload: feedbacks });
+    const sanitized = sanitizeFeedbackArray(feedbacks);
+    localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(sanitized));
+    if (channel) channel.postMessage({ type: "FEEDBACKS_UPDATED", payload: sanitized });
+    return sanitized;
   } catch (e) {
     console.error("Failed to save feedbacks", e);
+    return sanitizeFeedbackArray(feedbacks);
   }
 };
 
@@ -172,9 +175,7 @@ export const addFeedback = (feedbackData) => {
   };
 
   const updated = [newEntry, ...current];
-  saveFeedbacks(updated);
-  // Optimization: Return the updated array to avoid synchronous localStorage re-reading and JSON.parse in callers
-  return updated;
+  return saveFeedbacks(updated);
 };
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
@@ -191,8 +192,7 @@ export const updateFeedbackStatus = (id, newStatus, note = "") => {
     }
     return fb;
   });
-  saveFeedbacks(updated);
-  return updated;
+  return saveFeedbacks(updated);
 };
 
 export const resetToSeedData = () => {
