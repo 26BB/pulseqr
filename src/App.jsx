@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import DemoBar from './components/common/DemoBar';
 import DinerView from './components/diner/DinerView';
 import AdminDashboard from './components/admin/AdminDashboard';
-import QrStandeeGenerator from './components/admin/QrStandeeGenerator';
-import PmDocsModal from './components/common/PmDocsModal';
+
+// Optimization: Code-split modal overlay components with React.lazy to reduce initial JS bundle size.
+// qrcode.react and heavy documentation text are fetched on-demand only when modals are opened.
+const QrStandeeGenerator = lazy(() => import('./components/admin/QrStandeeGenerator'));
+const PmDocsModal = lazy(() => import('./components/common/PmDocsModal'));
 import {
   getStoredFeedbacks,
   getStoredSettings,
@@ -216,15 +219,19 @@ export default function App() {
 
       {/* Table QR Standee Generator Modal */}
       {standeesModalOpen && (
-        <QrStandeeGenerator
-          settings={settings}
-          onClose={handleCloseStandee}
-        />
+        <Suspense fallback={null}>
+          <QrStandeeGenerator
+            settings={settings}
+            onClose={handleCloseStandee}
+          />
+        </Suspense>
       )}
 
       {/* PM Documentation & Case Study Reader Modal */}
       {docsModalOpen && (
-        <PmDocsModal onClose={handleCloseDocs} />
+        <Suspense fallback={null}>
+          <PmDocsModal onClose={handleCloseDocs} />
+        </Suspense>
       )}
 
       {/* Bottom Subtle Status Tag */}
