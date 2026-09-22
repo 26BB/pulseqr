@@ -2,6 +2,16 @@ import React, { useState, useMemo, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Printer, Download, ShieldCheck } from 'lucide-react';
 
+// Optimization: Static QR code logo overlay settings hoisted outside component to maintain stable reference identity across renders
+const QR_IMAGE_SETTINGS = {
+  src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%231E60FF'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='%23FFD000'>⚡</text></svg>",
+  x: undefined,
+  y: undefined,
+  height: 28,
+  width: 28,
+  excavate: true,
+};
+
 // Optimization: Memoize QrStandeeGenerator to prevent unnecessary re-renders when parent state updates while standee modal is open
 const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
@@ -13,10 +23,11 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
     [totalTables]
   );
 
-  const getDinerUrl = (table) => {
+  // Optimization: Memoize diner URL calculation per selected table to avoid URL parsing and string concatenation on every render
+  const dinerUrl = useMemo(() => {
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?view=diner&table=${table}`;
-  };
+    return `${baseUrl}?view=diner&table=${selectedTable}`;
+  }, [selectedTable]);
 
   const handlePrint = () => {
     window.print();
@@ -114,18 +125,11 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
               {/* Dynamic QR Code Surface */}
               <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl mx-auto my-1 border-2 border-white/50">
                 <QRCodeSVG
-                  value={getDinerUrl(selectedTable)}
+                  value={dinerUrl}
                   size={150}
                   level="H"
                   includeMargin={true}
-                  imageSettings={{
-                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%231E60FF'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='%23FFD000'>⚡</text></svg>",
-                    x: undefined,
-                    y: undefined,
-                    height: 28,
-                    width: 28,
-                    excavate: true,
-                  }}
+                  imageSettings={QR_IMAGE_SETTINGS}
                 />
               </div>
 

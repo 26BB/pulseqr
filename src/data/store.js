@@ -39,17 +39,48 @@ const sanitizeSettings = (obj) => {
   };
 };
 
-// Helper to validate each feedback item shape (Security: Input Validation for untrusted BroadcastChannel / storage events)
+const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
+
+// Helper to validate and sanitize individual feedback objects (Security: Deep input validation & truncation)
+const sanitizeFeedbackItem = (fb) => {
+  if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
+  const ratings = {
+    food: sanitizeRating(fb.ratings?.food),
+    service: sanitizeRating(fb.ratings?.service),
+    ambiance: sanitizeRating(fb.ratings?.ambiance),
+  };
+  const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
+    ? Number(fb.overallScore.toFixed(1))
+    : Number(((ratings.food + ratings.service + ratings.ambiance) / 3).toFixed(1));
+
+  const safeTags = Array.isArray(fb.tags)
+    ? fb.tags.slice(0, 10).map((t) => sanitizeString(t, 50)).filter(Boolean)
+    : [];
+
+  const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
+
+  return {
+    id: sanitizeString(fb.id, 50, `fb-${Date.now()}`),
+    table: sanitizeString(fb.table, 10, "04") || "04",
+    timestamp: sanitizeString(fb.timestamp, 50, new Date().toISOString()),
+    displayTime: sanitizeString(fb.displayTime, 30, "Just now"),
+    ratings,
+    overallScore: overall,
+    comment: sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.",
+    tags: safeTags,
+    status: safeStatus,
+    barista: sanitizeString(fb.barista, 50, "Pranav") || "Pranav",
+    guestName: sanitizeString(fb.guestName, 50, "Guest") || "Guest",
+    isAlert: Boolean(fb.isAlert),
+    ...(fb.resolutionNote ? { resolutionNote: sanitizeString(fb.resolutionNote, 500, "") } : {}),
+  };
+};
+
+// Helper to validate each feedback item shape (Security: Input Validation & DoS prevention for untrusted BroadcastChannel / storage events)
 const sanitizeFeedbackArray = (arr) => {
   if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
-  return arr.filter(
-    (fb) =>
-      fb &&
-      typeof fb === "object" &&
-      typeof fb.id === "string" &&
-      fb.ratings &&
-      typeof fb.ratings === "object"
-  );
+  // Truncate array length to 100 to prevent LocalStorage / BroadcastChannel DoS (Uncontrolled Resource Consumption)
+  return arr.slice(0, 100).map(sanitizeFeedbackItem).filter(Boolean);
 };
 
 export const getStoredSettings = () => {
@@ -126,7 +157,7 @@ export const addFeedback = (feedbackData) => {
     : [];
 
   const newEntry = {
-    id: `fb-${Date.now().toString().slice(-4)}`,
+    id: `fb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     table: sanitizeString(feedbackData?.table, 10, "04") || "04",
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
@@ -145,8 +176,6 @@ export const addFeedback = (feedbackData) => {
   // Optimization: Return the updated array to avoid synchronous localStorage re-reading and JSON.parse in callers
   return updated;
 };
-
-const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const current = getStoredFeedbacks();
