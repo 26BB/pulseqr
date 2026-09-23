@@ -4,6 +4,10 @@ import { INITIAL_FEEDBACKS, INITIAL_SETTINGS } from "./mockData";
 const STORAGE_KEY_FEEDBACKS = "pulseqr_feedbacks_v1";
 const STORAGE_KEY_SETTINGS = "pulseqr_settings_v1";
 
+// Optimization: In-memory store cache prevents synchronous main-thread localStorage disk reads and JSON.parse on every mutation
+let cachedFeedbacks = null;
+let cachedSettings = null;
+
 let channel = null;
 try {
   channel = new BroadcastChannel("pulseqr_realtime_channel");
@@ -84,15 +88,19 @@ const sanitizeFeedbackArray = (arr) => {
 };
 
 export const getStoredSettings = () => {
+  if (cachedSettings !== null) return cachedSettings;
   try {
     const raw = localStorage.getItem(STORAGE_KEY_SETTINGS);
     if (!raw) {
       localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(INITIAL_SETTINGS));
+      cachedSettings = INITIAL_SETTINGS;
       return INITIAL_SETTINGS;
     }
     const parsed = JSON.parse(raw);
-    return sanitizeSettings(parsed);
+    cachedSettings = sanitizeSettings(parsed);
+    return cachedSettings;
   } catch {
+    cachedSettings = INITIAL_SETTINGS;
     return INITIAL_SETTINGS;
   }
 };
@@ -100,6 +108,7 @@ export const getStoredSettings = () => {
 export const saveSettings = (newSettings) => {
   try {
     const sanitizedSettings = sanitizeSettings(newSettings);
+    cachedSettings = sanitizedSettings;
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(sanitizedSettings));
     if (channel) channel.postMessage({ type: "SETTINGS_UPDATED", payload: sanitizedSettings });
   } catch (e) {
@@ -108,21 +117,26 @@ export const saveSettings = (newSettings) => {
 };
 
 export const getStoredFeedbacks = () => {
+  if (cachedFeedbacks !== null) return cachedFeedbacks;
   try {
     const raw = localStorage.getItem(STORAGE_KEY_FEEDBACKS);
     if (!raw) {
       localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(INITIAL_FEEDBACKS));
+      cachedFeedbacks = INITIAL_FEEDBACKS;
       return INITIAL_FEEDBACKS;
     }
     const parsed = JSON.parse(raw);
-    return sanitizeFeedbackArray(parsed);
+    cachedFeedbacks = sanitizeFeedbackArray(parsed);
+    return cachedFeedbacks;
   } catch {
+    cachedFeedbacks = INITIAL_FEEDBACKS;
     return INITIAL_FEEDBACKS;
   }
 };
 
 export const saveFeedbacks = (feedbacks) => {
   try {
+    cachedFeedbacks = feedbacks;
     localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(feedbacks));
     if (channel) channel.postMessage({ type: "FEEDBACKS_UPDATED", payload: feedbacks });
   } catch (e) {
@@ -196,6 +210,8 @@ export const updateFeedbackStatus = (id, newStatus, note = "") => {
 };
 
 export const resetToSeedData = () => {
+  cachedFeedbacks = INITIAL_FEEDBACKS;
+  cachedSettings = INITIAL_SETTINGS;
   localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(INITIAL_FEEDBACKS));
   localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(INITIAL_SETTINGS));
   if (channel) channel.postMessage({ type: "RESET_ALL" });
@@ -207,10 +223,16 @@ export const subscribeToRealtime = (callback) => {
     if (event?.data && typeof event.data === "object") {
       const { type, payload } = event.data;
       if (type === "FEEDBACKS_UPDATED") {
-        callback({ type, payload: sanitizeFeedbackArray(payload) });
+        const sanitized = sanitizeFeedbackArray(payload);
+        cachedFeedbacks = sanitized;
+        callback({ type, payload: sanitized });
       } else if (type === "SETTINGS_UPDATED") {
-        callback({ type, payload: sanitizeSettings(payload) });
+        const sanitized = sanitizeSettings(payload);
+        cachedSettings = sanitized;
+        callback({ type, payload: sanitized });
       } else if (type === "RESET_ALL") {
+        cachedFeedbacks = INITIAL_FEEDBACKS;
+        cachedSettings = INITIAL_SETTINGS;
         callback({ type });
       }
     }
@@ -220,15 +242,21 @@ export const subscribeToRealtime = (callback) => {
     if (event.key === STORAGE_KEY_FEEDBACKS) {
       try {
         const parsed = JSON.parse(event.newValue || "[]");
-        callback({ type: "FEEDBACKS_UPDATED", payload: sanitizeFeedbackArray(parsed) });
+        const sanitized = sanitizeFeedbackArray(parsed);
+        cachedFeedbacks = sanitized;
+        callback({ type: "FEEDBACKS_UPDATED", payload: sanitized });
       } catch {
+        cachedFeedbacks = [];
         callback({ type: "FEEDBACKS_UPDATED", payload: [] });
       }
     } else if (event.key === STORAGE_KEY_SETTINGS) {
       try {
         const parsed = JSON.parse(event.newValue || "{}");
-        callback({ type: "SETTINGS_UPDATED", payload: sanitizeSettings(parsed) });
+        const sanitized = sanitizeSettings(parsed);
+        cachedSettings = sanitized;
+        callback({ type: "SETTINGS_UPDATED", payload: sanitized });
       } catch {
+        cachedSettings = INITIAL_SETTINGS;
         callback({ type: "SETTINGS_UPDATED", payload: INITIAL_SETTINGS });
       }
     }
