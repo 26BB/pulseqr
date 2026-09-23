@@ -159,8 +159,10 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
 
             {/* Direct Note & Resolve */}
             <div className="flex gap-2">
+              {/* Security: Enforce input length limit (maxLength) to prevent LocalStorage DoS / bloat */}
               <input
                 type="text"
+                maxLength={500}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Optional resolution note (e.g. Swapped coffee, apologized)"
