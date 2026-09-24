@@ -17,3 +17,7 @@
 ## 2026-09-28 - In-Memory Store Caching for LocalStorage Sync Layer
 **Learning:** Calling `localStorage.getItem` and parsing JSON inside store getters (`getStoredFeedbacks`, `getStoredSettings`) invoked during mutations causes blocking main-thread storage reads even when data is already available in memory.
 **Action:** Maintain module-scoped in-memory cache variables (`cachedFeedbacks`, `cachedSettings`) that populate on first read and stay updated on local mutations and cross-tab storage/BroadcastChannel events to avoid synchronous disk reads and parsing.
+
+## 2026-09-30 - Route/View-Level Code Splitting for Role-Specific Subtrees
+**Learning:** Monolithic bundle inclusion of heavy administrative features (`AdminDashboard`, analytics charts, settings forms) penalizes the critical load path for high-frequency end-user mobile flows (diners scanning table QR codes in `?view=diner`).
+**Action:** Use `React.lazy` and `Suspense` to code-split operational canvases and secondary views into separate dynamic chunks so primary mobile user flows download only the essential JS bundle on initial load.

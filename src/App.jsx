@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import DemoBar from './components/common/DemoBar';
 import DinerView from './components/diner/DinerView';
-import AdminDashboard from './components/admin/AdminDashboard';
 
-// Optimization: Code-split modal overlay components with React.lazy to reduce initial JS bundle size.
-// qrcode.react and heavy documentation text are fetched on-demand only when modals are opened.
+// Optimization: Code-split AdminDashboard and modal components with React.lazy to reduce initial JS bundle size.
+// Primary mobile diners scanning table QR codes (?view=diner) don't need to load admin operations, settings, or analytics code on initial page load.
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const QrStandeeGenerator = lazy(() => import('./components/admin/QrStandeeGenerator'));
 const PmDocsModal = lazy(() => import('./components/common/PmDocsModal'));
 import {
@@ -171,14 +171,16 @@ export default function App() {
         )}
 
         {currentView === 'admin' && (
-          <AdminDashboard
-            feedbacks={feedbacks}
-            settings={settings}
-            onResolveFeedback={handleResolveFeedback}
-            onSaveSettings={handleSaveSettings}
-            onResetData={handleResetData}
+          <Suspense fallback={<div className="p-8 text-center text-slate-400 font-bold text-xs animate-pulse">Loading Admin Operations Hub...</div>}>
+            <AdminDashboard
+              feedbacks={feedbacks}
+              settings={settings}
+              onResolveFeedback={handleResolveFeedback}
+              onSaveSettings={handleSaveSettings}
+              onResetData={handleResetData}
               onOpenStandees={handleOpenStandee}
-          />
+            />
+          </Suspense>
         )}
 
         {currentView === 'split' && (
@@ -204,14 +206,16 @@ export default function App() {
                   💻 Live Operations & Feedback Intercept Hub
                 </span>
               </div>
-              <AdminDashboard
-                feedbacks={feedbacks}
-                settings={settings}
-                onResolveFeedback={handleResolveFeedback}
-                onSaveSettings={handleSaveSettings}
-                onResetData={handleResetData}
-                onOpenStandees={handleOpenStandee}
-              />
+              <Suspense fallback={<div className="p-8 text-center text-slate-400 font-bold text-xs animate-pulse">Loading Live Operations Canvas...</div>}>
+                <AdminDashboard
+                  feedbacks={feedbacks}
+                  settings={settings}
+                  onResolveFeedback={handleResolveFeedback}
+                  onSaveSettings={handleSaveSettings}
+                  onResetData={handleResetData}
+                  onOpenStandees={handleOpenStandee}
+                />
+              </Suspense>
             </div>
           </div>
         )}
