@@ -65,6 +65,7 @@ const AdminDashboard = memo(function AdminDashboard({
   }, [feedbacks]);
 
   const filteredFeedbacks = useMemo(() => {
+    if (filter === 'all') return feedbacks;
     return feedbacks.filter((f) => {
       if (filter === 'alert') return f.isAlert;
       if (filter === '5star') return f.overallScore >= 4.5;
