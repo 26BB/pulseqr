@@ -136,9 +136,10 @@ export const getStoredFeedbacks = () => {
 
 export const saveFeedbacks = (feedbacks) => {
   try {
-    cachedFeedbacks = feedbacks;
-    localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(feedbacks));
-    if (channel) channel.postMessage({ type: "FEEDBACKS_UPDATED", payload: feedbacks });
+    const sanitized = sanitizeFeedbackArray(feedbacks);
+    cachedFeedbacks = sanitized;
+    localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(sanitized));
+    if (channel) channel.postMessage({ type: "FEEDBACKS_UPDATED", payload: sanitized });
   } catch (e) {
     console.error("Failed to save feedbacks", e);
   }
@@ -170,8 +171,12 @@ export const addFeedback = (feedbackData) => {
     ? feedbackData.tags.slice(0, 10).map((t) => sanitizeString(t, 50)).filter(Boolean)
     : [];
 
+  const idSuffix = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID().slice(0, 8)
+    : Math.random().toString(36).slice(2, 7);
+
   const newEntry = {
-    id: `fb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: `fb-${Date.now()}-${idSuffix}`,
     table: sanitizeString(feedbackData?.table, 10, "04") || "04",
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
@@ -187,8 +192,8 @@ export const addFeedback = (feedbackData) => {
 
   const updated = [newEntry, ...current];
   saveFeedbacks(updated);
-  // Optimization: Return the updated array to avoid synchronous localStorage re-reading and JSON.parse in callers
-  return updated;
+  // Return the sanitized array from memory
+  return cachedFeedbacks || updated;
 };
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
