@@ -17,7 +17,9 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   const handleWhatsAppClick = () => {
     const encoded = encodeURIComponent(defaultWhatsAppText);
     let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '');
-    if (phoneDigits.length === 10) {
+    if (!phoneDigits) {
+      phoneDigits = '919823012345';
+    } else if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
     }
     window.open(`https://wa.me/${phoneDigits}?text=${encoded}`, '_blank', 'noopener,noreferrer');

@@ -28,6 +28,12 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
   return str.trim().slice(0, maxLen);
 };
 
+// Helper to sanitize table identifiers to safe alphanumeric strings (Security: Prevents injection / untrusted format)
+const sanitizeTable = (val) => {
+  if (typeof val !== "string") return "04";
+  return val.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 10) || "04";
+};
+
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
 const sanitizeSettings = (obj) => {
   if (!obj || typeof obj !== "object") return INITIAL_SETTINGS;
@@ -65,7 +71,7 @@ const sanitizeFeedbackItem = (fb) => {
 
   return {
     id: sanitizeString(fb.id, 50, `fb-${Date.now()}`),
-    table: sanitizeString(fb.table, 10, "04") || "04",
+    table: sanitizeTable(fb.table),
     timestamp: sanitizeString(fb.timestamp, 50, new Date().toISOString()),
     displayTime: sanitizeString(fb.displayTime, 30, "Just now"),
     ratings,
@@ -177,7 +183,7 @@ export const addFeedback = (feedbackData) => {
 
   const newEntry = {
     id: `fb-${Date.now()}-${idSuffix}`,
-    table: sanitizeString(feedbackData?.table, 10, "04") || "04",
+    table: sanitizeTable(feedbackData?.table),
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
     ratings,

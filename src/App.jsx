@@ -88,9 +88,12 @@ export default function App() {
   }, []);
 
   const handleTableChange = useCallback((newTable) => {
-    setCurrentTable(newTable);
+    const safeTable = typeof newTable === 'string'
+      ? newTable.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
+      : '04';
+    setCurrentTable(safeTable);
     const url = new URL(window.location);
-    url.searchParams.set('table', newTable);
+    url.searchParams.set('table', safeTable);
     window.history.replaceState({}, '', url);
   }, []);
 
