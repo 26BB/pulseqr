@@ -7,19 +7,28 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   if (!feedback) return null;
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
 
+  // Security: Helper to sanitize values embedded in URLs/messages (strips newlines and control chars)
+  const sanitizeMessageParam = (val, fallback = '') => {
+    if (val == null || val === '') return fallback;
+    // eslint-disable-next-line no-control-regex
+    return String(val).replace(/[\r\n\t\x00-\x1F\x7F]/g, ' ').trim() || fallback;
+  };
+
   // Generate personalized WhatsApp recovery link
-  const defaultWhatsAppText = `Hi ${feedback.guestName || 'there'}! This is ${
-    settings?.ownerName || 'Rohan'
-  } from ${settings?.cafeName || 'Brew & Beans'}. I noticed your feedback on Table ${
-    feedback.table
-  }. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
+  const guestName = sanitizeMessageParam(feedback.guestName, 'there');
+  const ownerName = sanitizeMessageParam(settings?.ownerName, 'Rohan');
+  const cafeName = sanitizeMessageParam(settings?.cafeName, 'Brew & Beans');
+  const table = sanitizeMessageParam(feedback.table, '04');
+
+  const defaultWhatsAppText = `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
 
   const handleWhatsAppClick = () => {
-    const encoded = encodeURIComponent(defaultWhatsAppText);
     let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '');
+    if (!phoneDigits) return; // Security: Prevent open redirection or invalid wa.me endpoint if phone is missing/invalid
     if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
     }
+    const encoded = encodeURIComponent(defaultWhatsAppText);
     window.open(`https://wa.me/${phoneDigits}?text=${encoded}`, '_blank', 'noopener,noreferrer');
     onResolve(feedback.id, 'RESOLVED', 'Contacted guest via WhatsApp');
   };
