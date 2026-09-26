@@ -71,21 +71,24 @@ const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 
 // Helper to validate and sanitize individual feedback objects (Security: Deep input validation & truncation)
 // Optimization: Checks if input properties already match sanitized outputs and reuses original object & array references
-// to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
-const sanitizeFeedbackItem = (fb) => {
+// (including existing items in cachedFeedbacks) to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
+const sanitizeFeedbackItem = (fb, existingItem = null) => {
   if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
 
   const food = sanitizeRating(fb.ratings?.food);
   const service = sanitizeRating(fb.ratings?.service);
   const ambiance = sanitizeRating(fb.ratings?.ambiance);
 
-  const ratingsChanged =
-    !fb.ratings ||
-    fb.ratings.food !== food ||
-    fb.ratings.service !== service ||
-    fb.ratings.ambiance !== ambiance;
-
-  const ratings = ratingsChanged ? { food, service, ambiance } : fb.ratings;
+  const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
+  const id = sanitizeString(fb.id, 50, `fb-${Date.now()}`);
+  const table = sanitizeString(fb.table, 10, "04") || "04";
+  const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
+  const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
+  const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
+  const barista = sanitizeString(fb.barista, 50, "Pranav") || "Pranav";
+  const guestName = sanitizeString(fb.guestName, 50, "Guest") || "Guest";
+  const isAlert = Boolean(fb.isAlert);
+  const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
 
   const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
     ? Number(fb.overallScore.toFixed(1))
@@ -108,16 +111,42 @@ const sanitizeFeedbackItem = (fb) => {
     }
   }
 
-  const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
-  const id = sanitizeString(fb.id, 50, `fb-${Date.now()}`);
-  const table = sanitizeString(fb.table, 10, "04") || "04";
-  const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
-  const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
-  const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
-  const barista = sanitizeString(fb.barista, 50, "Pranav") || "Pranav";
-  const guestName = sanitizeString(fb.guestName, 50, "Guest") || "Guest";
-  const isAlert = Boolean(fb.isAlert);
-  const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
+  // Optimization: If an existing cached item matches all sanitized properties, return existingItem to preserve object identity across BroadcastChannel / localStorage JSON.parse events
+  if (existingItem) {
+    const tagsMatch =
+      Array.isArray(existingItem.tags) &&
+      existingItem.tags.length === safeTags.length &&
+      existingItem.tags.every((t, idx) => t === safeTags[idx]);
+
+    const isExistingUnchanged =
+      existingItem.id === id &&
+      existingItem.table === table &&
+      existingItem.timestamp === timestamp &&
+      existingItem.displayTime === displayTime &&
+      existingItem.overallScore === overall &&
+      existingItem.comment === comment &&
+      existingItem.status === safeStatus &&
+      existingItem.barista === barista &&
+      existingItem.guestName === guestName &&
+      existingItem.isAlert === isAlert &&
+      existingItem.resolutionNote === resolutionNote &&
+      existingItem.ratings?.food === food &&
+      existingItem.ratings?.service === service &&
+      existingItem.ratings?.ambiance === ambiance &&
+      tagsMatch;
+
+    if (isExistingUnchanged) {
+      return existingItem;
+    }
+  }
+
+  const ratingsChanged =
+    !fb.ratings ||
+    fb.ratings.food !== food ||
+    fb.ratings.service !== service ||
+    fb.ratings.ambiance !== ambiance;
+
+  const ratings = ratingsChanged ? { food, service, ambiance } : fb.ratings;
 
   const isUnchanged =
     !ratingsChanged &&
@@ -156,20 +185,38 @@ const sanitizeFeedbackItem = (fb) => {
 };
 
 // Helper to validate each feedback item shape (Security: Input Validation & DoS prevention for untrusted BroadcastChannel / storage events)
-// Optimization: If all elements in array are identical to input elements and length is unchanged, preserve original array reference.
+// Optimization: Uses cachedMap lookup to preserve original object references from cachedFeedbacks during real-time sync.
 const sanitizeFeedbackArray = (arr) => {
   if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
   const sliced = arr.slice(0, 100);
-  let changed = arr.length !== sliced.length;
+
+  const cachedMap = cachedFeedbacks && Array.isArray(cachedFeedbacks)
+    ? new Map(cachedFeedbacks.map((item) => [item.id, item]))
+    : null;
+
+  let changedFromInput = arr.length !== sliced.length;
   const result = [];
   for (let i = 0; i < sliced.length; i++) {
-    const item = sanitizeFeedbackItem(sliced[i]);
-    if (item !== sliced[i]) changed = true;
+    const cachedItem = cachedMap ? cachedMap.get(sliced[i]?.id) : null;
+    const item = sanitizeFeedbackItem(sliced[i], cachedItem);
+    if (item !== sliced[i]) changedFromInput = true;
     if (item) result.push(item);
   }
-  if (!changed && result.length === arr.length) {
+
+  // Optimization: If result matches cachedFeedbacks element-by-element, reuse cachedFeedbacks array reference
+  if (
+    cachedFeedbacks &&
+    cachedFeedbacks.length === result.length &&
+    cachedFeedbacks.every((item, idx) => item === result[idx])
+  ) {
+    return cachedFeedbacks;
+  }
+
+  // Optimization: If result matches input arr element-by-element, reuse input arr reference
+  if (!changedFromInput && result.length === arr.length) {
     return arr;
   }
+
   return result;
 };
 
@@ -286,18 +333,29 @@ export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const current = getStoredFeedbacks();
   const safeNote = sanitizeString(note, 500, "");
   const safeStatus = VALID_STATUSES.includes(newStatus) ? newStatus : "ACKNOWLEDGED";
+
+  let changed = false;
   const updated = current.map((fb) => {
     if (fb.id === id) {
-      return {
-        ...fb,
-        status: safeStatus,
-        resolutionNote: safeNote || fb.resolutionNote,
-      };
+      const targetNote = safeNote || fb.resolutionNote;
+      if (fb.status !== safeStatus || fb.resolutionNote !== targetNote) {
+        changed = true;
+        return {
+          ...fb,
+          status: safeStatus,
+          ...(targetNote !== undefined ? { resolutionNote: targetNote } : {}),
+        };
+      }
     }
     return fb;
   });
+
+  if (!changed) {
+    return current;
+  }
+
   saveFeedbacks(updated);
-  return updated;
+  return cachedFeedbacks || updated;
 };
 
 export const resetToSeedData = () => {
