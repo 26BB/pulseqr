@@ -29,62 +29,148 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
+// Optimization: If the input object already matches all sanitized properties, return the original object reference
+// to maintain object reference identity, preventing unnecessary React component re-renders when consumed by React.memo components.
 const sanitizeSettings = (obj) => {
   if (!obj || typeof obj !== "object") return INITIAL_SETTINGS;
+  const cafeName = sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName);
+  const branch = sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch);
+  const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
+  const ownerName = sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName);
+  const ownerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
+  const discountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
+  const alertThreshold = Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2)));
+  const tableCount = Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15)));
+
+  if (
+    obj.cafeName === cafeName &&
+    obj.branch === branch &&
+    obj.address === address &&
+    obj.ownerName === ownerName &&
+    obj.ownerPhone === ownerPhone &&
+    obj.discountCode === discountCode &&
+    obj.alertThreshold === alertThreshold &&
+    obj.tableCount === tableCount
+  ) {
+    return obj;
+  }
+
   return {
-    cafeName: sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName),
-    branch: sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch),
-    address: sanitizeString(obj.address, 200, INITIAL_SETTINGS.address),
-    ownerName: sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName),
-    ownerPhone: sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone),
-    discountCode: sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode),
-    alertThreshold: Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2))),
-    tableCount: Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15))),
+    cafeName,
+    branch,
+    address,
+    ownerName,
+    ownerPhone,
+    discountCode,
+    alertThreshold,
+    tableCount,
   };
 };
 
 const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 
 // Helper to validate and sanitize individual feedback objects (Security: Deep input validation & truncation)
+// Optimization: Checks if input properties already match sanitized outputs and reuses original object & array references
+// to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
 const sanitizeFeedbackItem = (fb) => {
   if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
-  const ratings = {
-    food: sanitizeRating(fb.ratings?.food),
-    service: sanitizeRating(fb.ratings?.service),
-    ambiance: sanitizeRating(fb.ratings?.ambiance),
-  };
+
+  const food = sanitizeRating(fb.ratings?.food);
+  const service = sanitizeRating(fb.ratings?.service);
+  const ambiance = sanitizeRating(fb.ratings?.ambiance);
+
+  const ratingsChanged =
+    !fb.ratings ||
+    fb.ratings.food !== food ||
+    fb.ratings.service !== service ||
+    fb.ratings.ambiance !== ambiance;
+
+  const ratings = ratingsChanged ? { food, service, ambiance } : fb.ratings;
+
   const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
     ? Number(fb.overallScore.toFixed(1))
-    : Number(((ratings.food + ratings.service + ratings.ambiance) / 3).toFixed(1));
+    : Number(((food + service + ambiance) / 3).toFixed(1));
 
-  const safeTags = Array.isArray(fb.tags)
-    ? fb.tags.slice(0, 10).map((t) => sanitizeString(t, 50)).filter(Boolean)
-    : [];
+  let safeTags = fb.tags;
+  if (!Array.isArray(fb.tags)) {
+    safeTags = [];
+  } else {
+    const truncated = fb.tags.slice(0, 10);
+    let tagsChanged = fb.tags.length !== truncated.length;
+    const cleanTags = [];
+    for (let i = 0; i < truncated.length; i++) {
+      const tagStr = sanitizeString(truncated[i], 50);
+      if (tagStr !== truncated[i]) tagsChanged = true;
+      if (tagStr) cleanTags.push(tagStr);
+    }
+    if (tagsChanged || cleanTags.length !== truncated.length) {
+      safeTags = cleanTags;
+    }
+  }
 
   const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
+  const id = sanitizeString(fb.id, 50, `fb-${Date.now()}`);
+  const table = sanitizeString(fb.table, 10, "04") || "04";
+  const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
+  const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
+  const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
+  const barista = sanitizeString(fb.barista, 50, "Pranav") || "Pranav";
+  const guestName = sanitizeString(fb.guestName, 50, "Guest") || "Guest";
+  const isAlert = Boolean(fb.isAlert);
+  const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
+
+  const isUnchanged =
+    !ratingsChanged &&
+    safeTags === fb.tags &&
+    fb.id === id &&
+    fb.table === table &&
+    fb.timestamp === timestamp &&
+    fb.displayTime === displayTime &&
+    fb.overallScore === overall &&
+    fb.comment === comment &&
+    fb.status === safeStatus &&
+    fb.barista === barista &&
+    fb.guestName === guestName &&
+    fb.isAlert === isAlert &&
+    fb.resolutionNote === resolutionNote;
+
+  if (isUnchanged) {
+    return fb;
+  }
 
   return {
-    id: sanitizeString(fb.id, 50, `fb-${Date.now()}`),
-    table: sanitizeString(fb.table, 10, "04") || "04",
-    timestamp: sanitizeString(fb.timestamp, 50, new Date().toISOString()),
-    displayTime: sanitizeString(fb.displayTime, 30, "Just now"),
+    id,
+    table,
+    timestamp,
+    displayTime,
     ratings,
     overallScore: overall,
-    comment: sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.",
+    comment,
     tags: safeTags,
     status: safeStatus,
-    barista: sanitizeString(fb.barista, 50, "Pranav") || "Pranav",
-    guestName: sanitizeString(fb.guestName, 50, "Guest") || "Guest",
-    isAlert: Boolean(fb.isAlert),
-    ...(fb.resolutionNote ? { resolutionNote: sanitizeString(fb.resolutionNote, 500, "") } : {}),
+    barista,
+    guestName,
+    isAlert,
+    ...(resolutionNote !== undefined ? { resolutionNote } : {}),
   };
 };
 
 // Helper to validate each feedback item shape (Security: Input Validation & DoS prevention for untrusted BroadcastChannel / storage events)
+// Optimization: If all elements in array are identical to input elements and length is unchanged, preserve original array reference.
 const sanitizeFeedbackArray = (arr) => {
   if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
-  // Truncate array length to 100 to prevent LocalStorage / BroadcastChannel DoS (Uncontrolled Resource Consumption)
-  return arr.slice(0, 100).map(sanitizeFeedbackItem).filter(Boolean);
+  const sliced = arr.slice(0, 100);
+  let changed = arr.length !== sliced.length;
+  const result = [];
+  for (let i = 0; i < sliced.length; i++) {
+    const item = sanitizeFeedbackItem(sliced[i]);
+    if (item !== sliced[i]) changed = true;
+    if (item) result.push(item);
+  }
+  if (!changed && result.length === arr.length) {
+    return arr;
+  }
+  return result;
 };
 
 export const getStoredSettings = () => {
