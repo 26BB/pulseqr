@@ -21,3 +21,7 @@
 ## 2026-10-02 - Identity-Preserving Sanitization
 **Learning:** Returning newly constructed object/array literals during state sanitization/normalization on every storage event or real-time broadcast message breaks React object identity (`===`), defeating `React.memo` and causing full tree re-renders even when no properties actually changed.
 **Action:** Always check if sanitized properties match existing values and return original object and array references when input data is unchanged.
+
+## 2026-10-05 - Direct Map Population vs Array.map
+**Learning:** Initializing a Map from an array using `new Map(array.map(item => [item.key, item]))` allocates $N$ 2-element tuple arrays plus an intermediate mapped array on every invocation. In hot sanitization functions triggered by real-time BroadcastChannel or storage events, this creates excessive GC pressure.
+**Action:** Construct Map instances directly with a `for` loop and `map.set(key, val)` to achieve $O(1)$ allocation complexity for lookup maps.
