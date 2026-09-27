@@ -23,7 +23,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   const defaultWhatsAppText = `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
 
   const handleWhatsAppClick = () => {
-    let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '');
+    let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '').slice(0, 15);
     if (!phoneDigits) return; // Security: Prevent open redirection or invalid wa.me endpoint if phone is missing/invalid
     if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
