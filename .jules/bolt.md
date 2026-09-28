@@ -21,3 +21,7 @@
 ## 2026-10-02 - Identity-Preserving Sanitization
 **Learning:** Returning newly constructed object/array literals during state sanitization/normalization on every storage event or real-time broadcast message breaks React object identity (`===`), defeating `React.memo` and causing full tree re-renders even when no properties actually changed.
 **Action:** Always check if sanitized properties match existing values and return original object and array references when input data is unchanged.
+
+## 2026-10-05 - Form Control Re-render Isolation
+**Learning:** High-frequency input state changes (e.g., text comment keypresses) in a parent form component re-render all inline child controls (emoji rating buttons, preset tag chips) on every character typed unless those interactive controls are isolated into `React.memo` components with `useCallback` handlers.
+**Action:** Extract static or category-level form controls into memoized sub-components and pass `useCallback` event handlers so high-frequency text input state updates don't cause child button re-renders.
