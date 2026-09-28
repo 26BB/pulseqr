@@ -38,7 +38,9 @@ const sanitizeSettings = (obj) => {
   const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
   const ownerName = sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName);
   const ownerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
-  const discountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
+  // Security: Sanitize discountCode to alphanumeric, hyphens, and underscores to prevent injection / malformed codes from cross-tab sync or LocalStorage
+  const rawDiscountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
+  const discountCode = rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode;
   const alertThreshold = Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2)));
   const tableCount = Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15)));
 
