@@ -190,9 +190,18 @@ const sanitizeFeedbackArray = (arr) => {
   if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
   const sliced = arr.slice(0, 100);
 
-  const cachedMap = cachedFeedbacks && Array.isArray(cachedFeedbacks)
-    ? new Map(cachedFeedbacks.map((item) => [item.id, item]))
-    : null;
+  // Optimization: Populate Map directly with a for loop to avoid allocating N 2-element key-value arrays
+  // and 1 wrapper array via .map(...) on every feedback array sanitization pass during real-time sync.
+  let cachedMap = null;
+  if (cachedFeedbacks && Array.isArray(cachedFeedbacks)) {
+    cachedMap = new Map();
+    for (let i = 0; i < cachedFeedbacks.length; i++) {
+      const item = cachedFeedbacks[i];
+      if (item && item.id) {
+        cachedMap.set(item.id, item);
+      }
+    }
+  }
 
   let changedFromInput = arr.length !== sliced.length;
   const result = [];
