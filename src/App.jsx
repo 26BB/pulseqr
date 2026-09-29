@@ -23,6 +23,12 @@ const VALID_VIEWS = ['diner', 'admin', 'split'];
 // Security: Validate and sanitize view query parameter against allowlist to prevent application broken state / UI DoS
 const sanitizeView = (view) => (VALID_VIEWS.includes(view) ? view : 'split');
 
+// Security: Validate and sanitize table parameter to prevent invalid characters, injection, or excessive length
+const sanitizeTable = (table) =>
+  typeof table === 'string'
+    ? table.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
+    : '04';
+
 export default function App() {
   // Optimization: Lazy state initializers prevent URL query parameter parsing and regex
   // sanitization from executing synchronously on every re-render of the root App component.
@@ -33,11 +39,7 @@ export default function App() {
 
   const [currentTable, setCurrentTable] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    const rawTableParam = params.get('table') || '04';
-    // Security: Sanitize table parameter from URL to prevent unwanted input or injection
-    return typeof rawTableParam === 'string'
-      ? rawTableParam.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04'
-      : '04';
+    return sanitizeTable(params.get('table'));
   });
 
   // Optimization: Lazy state initialization avoids executing synchronous localStorage.getItem
@@ -53,8 +55,7 @@ export default function App() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('view')) setCurrentView(sanitizeView(params.get('view')));
       if (params.get('table')) {
-        const safeTable = params.get('table').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10) || '04';
-        setCurrentTable(safeTable);
+        setCurrentTable(sanitizeTable(params.get('table')));
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -88,9 +89,10 @@ export default function App() {
   }, []);
 
   const handleTableChange = useCallback((newTable) => {
-    setCurrentTable(newTable);
+    const safeTable = sanitizeTable(newTable);
+    setCurrentTable(safeTable);
     const url = new URL(window.location);
-    url.searchParams.set('table', newTable);
+    url.searchParams.set('table', safeTable);
     window.history.replaceState({}, '', url);
   }, []);
 
