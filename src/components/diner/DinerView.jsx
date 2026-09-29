@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 
 const EMOJIS = [
@@ -20,6 +20,55 @@ const PRESET_TAGS = [
   'Slow Service ⏰',
 ];
 
+// Optimization: Memoized rating category row isolates emoji button rendering from parent text input state (e.g. comment typing),
+// preventing 15 button element re-renders per character typed on mobile devices.
+const EmojiRatingCategory = memo(function EmojiRatingCategory({ title, category, value, onRating }) {
+  return (
+    <div className="mb-2 bg-[#FFFDF9] p-2.5 rounded-2xl border border-[#F0E6DD]">
+      <div className="flex items-center justify-between text-xs font-bold text-[#251912] mb-1.5">
+        <span>{title}</span>
+        <span className="text-[#FF6B4A] font-black">
+          {value}/5 {EMOJIS[value - 1].symbol}
+        </span>
+      </div>
+      <div className="flex justify-between items-center px-1">
+        {EMOJIS.map((e) => (\n          <button
+            key={e.val}
+            type="button"
+            aria-label={e.label}
+            onClick={() => onRating(category, e.val)}
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer ${
+              value === e.val
+                ? 'scale-125 bg-[#FFF4EE] shadow-sm'
+                : 'opacity-65 hover:opacity-100 hover:scale-110'
+            }`}
+            title={e.label}
+          >
+            {e.symbol}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// Optimization: Memoized preset tag chip isolates tag chip rendering from text comment input state changes.
+const PresetTagChip = memo(function PresetTagChip({ tag, isSelected, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(tag)}
+      className={`px-2 py-0.5 rounded-full font-bold transition-colors cursor-pointer ${
+        isSelected
+          ? 'bg-[#FFD700] text-[#251912]'
+          : 'bg-[#FFF4EE] text-[#6B584F] hover:bg-[#FFE8DD]'
+      }`}
+    >
+      {tag}
+    </button>
+  );
+});
+
 // Optimization: Memoize DinerView to skip re-renders when parent App state updates (e.g. feedback array sync, demo bar clicks)
 const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, settings }) {
   const [step, setStep] = useState('welcome'); // 'welcome' | 'form' | 'success'
@@ -29,15 +78,16 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
   const [copied, setCopied] = useState(false);
   const [lastSubmissionAlert, setLastSubmissionAlert] = useState(false);
 
-  const handleRating = (category, val) => {
+  // Optimization: Memoize callbacks with empty dependency arrays to maintain stable references for EmojiRatingCategory and PresetTagChip
+  const handleRating = useCallback((category, val) => {
     setRatings((prev) => ({ ...prev, [category]: val }));
-  };
+  }, []);
 
-  const handleTagToggle = (tag) => {
+  const handleTagToggle = useCallback((tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
-  };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -190,110 +240,41 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                 </div>
 
                 {/* Category 1: Food Quality */}
-                <div className="mb-2 bg-[#FFFDF9] p-2.5 rounded-2xl border border-[#F0E6DD]">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#251912] mb-1.5">
-                    <span>Coffee & Food Taste</span>
-                    <span className="text-[#FF6B4A] font-black">
-                      {ratings.food}/5 {EMOJIS[ratings.food - 1].symbol}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center px-1">
-                    {EMOJIS.map((e) => (
-                      <button
-                        key={e.val}
-                        type="button"
-                        aria-label={e.label}
-                        onClick={() => handleRating('food', e.val)}
-                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer ${
-                          ratings.food === e.val
-                            ? 'scale-125 bg-[#FFF4EE] shadow-sm'
-                            : 'opacity-65 hover:opacity-100 hover:scale-110'
-                        }`}
-                        title={e.label}
-                      >
-                        {e.symbol}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <EmojiRatingCategory
+                  title="Coffee & Food Taste"
+                  category="food"
+                  value={ratings.food}
+                  onRating={handleRating}
+                />
 
                 {/* Category 2: Service Speed */}
-                <div className="mb-2 bg-[#FFFDF9] p-2.5 rounded-2xl border border-[#F0E6DD]">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#251912] mb-1.5">
-                    <span>Barista Speed & Hospitality</span>
-                    <span className="text-[#FF6B4A] font-black">
-                      {ratings.service}/5 {EMOJIS[ratings.service - 1].symbol}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center px-1">
-                    {EMOJIS.map((e) => (
-                      <button
-                        key={e.val}
-                        type="button"
-                        aria-label={e.label}
-                        onClick={() => handleRating('service', e.val)}
-                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer ${
-                          ratings.service === e.val
-                            ? 'scale-125 bg-[#FFF4EE] shadow-sm'
-                            : 'opacity-65 hover:opacity-100 hover:scale-110'
-                        }`}
-                        title={e.label}
-                      >
-                        {e.symbol}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <EmojiRatingCategory
+                  title="Barista Speed & Hospitality"
+                  category="service"
+                  value={ratings.service}
+                  onRating={handleRating}
+                />
 
                 {/* Category 3: Ambiance */}
-                <div className="mb-2 bg-[#FFFDF9] p-2.5 rounded-2xl border border-[#F0E6DD]">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#251912] mb-1.5">
-                    <span>Vibe, Music & Seating</span>
-                    <span className="text-[#FF6B4A] font-black">
-                      {ratings.ambiance}/5 {EMOJIS[ratings.ambiance - 1].symbol}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center px-1">
-                    {EMOJIS.map((e) => (
-                      <button
-                        key={e.val}
-                        type="button"
-                        aria-label={e.label}
-                        onClick={() => handleRating('ambiance', e.val)}
-                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer ${
-                          ratings.ambiance === e.val
-                            ? 'scale-125 bg-[#FFF4EE] shadow-sm'
-                            : 'opacity-65 hover:opacity-100 hover:scale-110'
-                        }`}
-                        title={e.label}
-                      >
-                        {e.symbol}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <EmojiRatingCategory
+                  title="Vibe, Music & Seating"
+                  category="ambiance"
+                  value={ratings.ambiance}
+                  onRating={handleRating}
+                />
 
                 {/* Quick Highlights Chips */}
                 <div className="mb-2">
                   <div className="text-[10px] text-[#6B584F] mb-1 font-bold">Quick highlights:</div>
                   <div className="flex flex-wrap gap-1 text-[10px]">
-                    {PRESET_TAGS.map((tag) => {
-                      const isSelected = selectedTags.includes(tag);
-                      return (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => handleTagToggle(tag)}
-                          className={`px-2 py-0.5 rounded-full font-bold transition-colors cursor-pointer ${
-                            isSelected
-                              ? 'bg-[#FFD700] text-[#251912]'
-                              : 'bg-[#FFF4EE] text-[#6B584F] hover:bg-[#FFE8DD]'
-                          }`}
-                        >
-                          {tag}
-                        </button>
-                      );
-                    })}
+                    {PRESET_TAGS.map((tag) => (
+                      <PresetTagChip
+                        key={tag}
+                        tag={tag}
+                        isSelected={selectedTags.includes(tag)}
+                        onToggle={handleTagToggle}
+                      />
+                    ))}
                   </div>
                 </div>
 
