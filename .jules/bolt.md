@@ -25,3 +25,7 @@
 ## 2026-10-05 - Direct Map Population vs Array.map
 **Learning:** Initializing a Map from an array using `new Map(array.map(item => [item.key, item]))` allocates $N$ 2-element tuple arrays plus an intermediate mapped array on every invocation. In hot sanitization functions triggered by real-time BroadcastChannel or storage events, this creates excessive GC pressure.
 **Action:** Construct Map instances directly with a `for` loop and `map.set(key, val)` to achieve $O(1)$ allocation complexity for lookup maps.
+
+## 2026-10-05 - Form Control Re-render Isolation
+**Learning:** High-frequency input state changes (e.g., text comment keypresses) in a parent form component re-render all inline child controls (emoji rating buttons, preset tag chips) on every character typed unless those interactive controls are isolated into `React.memo` components with `useCallback` handlers.
+**Action:** Extract static or category-level form controls into memoized sub-components and pass `useCallback` event handlers so high-frequency text input state updates don't cause child button re-renders.
