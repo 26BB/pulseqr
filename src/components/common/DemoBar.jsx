@@ -131,6 +131,7 @@ const DemoBar = memo(function DemoBar({
           {/* Reset */}
           <button
             onClick={onResetData}
+            aria-label="Reset data to default seed"
             className="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             title="Reset data to default seed"
           >

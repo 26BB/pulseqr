@@ -139,6 +139,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close documentation hub"
             className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 cursor-pointer"
           >
             <X className="w-5 h-5" />
