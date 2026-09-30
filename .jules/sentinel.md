@@ -8,3 +8,8 @@
 **Vulnerability:** Processing untrusted, unbounded array payloads from cross-tab BroadcastChannel events or LocalStorage triggers main-thread CPU / memory exhaustion.
 **Learning:** Real-time synchronized apps without a backend must slice and truncate array payloads before mapping sanitization helpers.
 **Prevention:** Always cap array payload length (`arr.slice(0, MAX_LIMIT)`) in array sanitization methods.
+
+## 2026-09-30 - Prevent Stack Trace Leakage in Feedback Collector Widget
+**Vulnerability:** The client-side error listener captured raw stack traces (`event.error.stack`) and sent them to external webhooks.
+**Learning:** Error telemetry listeners can inadvertently expose internal code structure, dependencies, and file paths to external endpoints.
+**Prevention:** Omit raw stack traces and sanitize/truncate exception messages in client error reporting payloads.
