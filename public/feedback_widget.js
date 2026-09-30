@@ -8,14 +8,14 @@
   const capturedErrors = [];
   const MAX_ERRORS = 10;
 
+  // Security: Avoid leaking internal stack traces in client error reporting payloads
   window.addEventListener('error', function (event) {
     capturedErrors.push({
       type: 'uncaught_error',
-      message: event.message,
-      filename: event.filename,
+      message: event.message ? String(event.message).slice(0, 200) : 'Unknown error',
+      filename: event.filename ? String(event.filename).slice(0, 100) : '',
       lineno: event.lineno,
       colno: event.colno,
-      stack: event.error ? event.error.stack : null,
       time: new Date().toISOString()
     });
     if (capturedErrors.length > MAX_ERRORS) capturedErrors.shift();
@@ -313,12 +313,17 @@
     };
 
     try {
-      // Use text/plain or no-cors for seamless Google Apps Script webhook calls
-      await fetch(window.FEEDBACK_CONFIG.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
+      // Security: Validate webhook URL scheme to enforce HTTPS and prevent transmission over unencrypted HTTP
+      const webhookUrl = (window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.webhookUrl) || '';
+      if (typeof webhookUrl === 'string' && webhookUrl.startsWith('https://')) {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        console.warn("Feedback submission blocked: webhookUrl must use HTTPS");
+      }
     } catch (err) {
       console.warn("Feedback network request sent (no-cors mode):", err);
     }
