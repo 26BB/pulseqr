@@ -24,7 +24,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
 
   const handleWhatsAppClick = () => {
     let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '').slice(0, 15);
-    if (!phoneDigits) return; // Security: Prevent open redirection or invalid wa.me endpoint if phone is missing/invalid
+    if (!phoneDigits || phoneDigits.length < 7) return; // Security: Prevent open redirection or invalid wa.me endpoint if phone is missing or less than 7 digits
     if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
     }

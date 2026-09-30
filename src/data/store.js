@@ -28,6 +28,14 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
   return str.trim().slice(0, maxLen);
 };
 
+// Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection / malformed strings
+const sanitizeTable = (val, fallback = "04") => {
+  if (val == null) return fallback;
+  const str = String(val).trim();
+  const clean = str.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 10);
+  return clean || fallback;
+};
+
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
 // Optimization: If the input object already matches all sanitized properties, return the original object reference
 // to maintain object reference identity, preventing unnecessary React component re-renders when consumed by React.memo components.
@@ -83,7 +91,7 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
 
   const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
   const id = sanitizeString(fb.id, 50, `fb-${Date.now()}`);
-  const table = sanitizeString(fb.table, 10, "04") || "04";
+  const table = sanitizeTable(fb.table, "04");
   const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
   const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
   const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
@@ -321,7 +329,7 @@ export const addFeedback = (feedbackData) => {
 
   const newEntry = {
     id: `fb-${Date.now()}-${idSuffix}`,
-    table: sanitizeString(feedbackData?.table, 10, "04") || "04",
+    table: sanitizeTable(feedbackData?.table, "04"),
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
     ratings,

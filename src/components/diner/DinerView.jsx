@@ -32,7 +32,8 @@ const EmojiRatingCategory = memo(function EmojiRatingCategory({ title, category,
         </span>
       </div>
       <div className="flex justify-between items-center px-1">
-        {EMOJIS.map((e) => (\n          <button
+        {EMOJIS.map((e) => (
+          <button
             key={e.val}
             type="button"
             aria-label={e.label}
