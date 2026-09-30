@@ -4,10 +4,20 @@ import { Star } from 'lucide-react';
 
 // Optimization: Wrap AnalyticsView in React.memo to prevent re-renders when parent state changes (e.g. modal toggle, filter selection) while feedbacks remains unchanged
 const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
-  // Optimization: Single-pass O(N) calculation memoized with useMemo instead of running 3 separate .reduce() passes
-  const { avgFood, avgService, avgAmbiance } = useMemo(() => {
+  // Optimization: Single-pass O(N) calculation memoized with useMemo pre-computes both category averages
+  // and bar fill percentage metrics to eliminate per-render string-to-number type coercion (`avgFood / 5`) in JSX
+  const { avgFood, avgService, avgAmbiance, foodPercent, servicePercent, ambiancePercent } = useMemo(() => {
     const total = feedbacks.length;
-    if (!total) return { avgFood: '4.4', avgService: '4.6', avgAmbiance: '3.8' };
+    if (!total) {
+      return {
+        avgFood: '4.4',
+        avgService: '4.6',
+        avgAmbiance: '3.8',
+        foodPercent: 88,
+        servicePercent: 92,
+        ambiancePercent: 76,
+      };
+    }
 
     let foodSum = 0;
     let serviceSum = 0;
@@ -20,10 +30,17 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
       ambianceSum += f.ratings.ambiance;
     }
 
+    const foodAvg = foodSum / total;
+    const serviceAvg = serviceSum / total;
+    const ambianceAvg = ambianceSum / total;
+
     return {
-      avgFood: (foodSum / total).toFixed(1),
-      avgService: (serviceSum / total).toFixed(1),
-      avgAmbiance: (ambianceSum / total).toFixed(1),
+      avgFood: foodAvg.toFixed(1),
+      avgService: serviceAvg.toFixed(1),
+      avgAmbiance: ambianceAvg.toFixed(1),
+      foodPercent: Math.round((foodAvg / 5) * 100),
+      servicePercent: Math.round((serviceAvg / 5) * 100),
+      ambiancePercent: Math.round((ambianceAvg / 5) * 100),
     };
   }, [feedbacks]);
 
@@ -94,7 +111,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-[#1E60FF] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(avgFood / 5) * 100}%` }}
+                  style={{ width: `${foodPercent}%` }}
                 ></div>
               </div>
             </div>
@@ -107,7 +124,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(avgService / 5) * 100}%` }}
+                  style={{ width: `${servicePercent}%` }}
                 ></div>
               </div>
             </div>
@@ -120,7 +137,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-amber-400 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(avgAmbiance / 5) * 100}%` }}
+                  style={{ width: `${ambiancePercent}%` }}
                 ></div>
               </div>
             </div>
