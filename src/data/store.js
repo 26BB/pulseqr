@@ -7,6 +7,23 @@ const STORAGE_KEY_SETTINGS = "pulseqr_settings_v1";
 // Optimization: In-memory store cache prevents synchronous main-thread localStorage disk reads and JSON.parse on every mutation
 let cachedFeedbacks = null;
 let cachedSettings = null;
+let cachedFeedbacksMap = null;
+
+// Helper to update cachedFeedbacks and maintain module-scoped lookup Map
+const setCachedFeedbacks = (feedbacks) => {
+  cachedFeedbacks = feedbacks;
+  if (Array.isArray(feedbacks)) {
+    cachedFeedbacksMap = new Map();
+    for (let i = 0; i < feedbacks.length; i++) {
+      const item = feedbacks[i];
+      if (item && item.id) {
+        cachedFeedbacksMap.set(item.id, item);
+      }
+    }
+  } else {
+    cachedFeedbacksMap = null;
+  }
+};
 
 let channel = null;
 try {
@@ -187,28 +204,19 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
 };
 
 // Helper to validate each feedback item shape (Security: Input Validation & DoS prevention for untrusted BroadcastChannel / storage events)
-// Optimization: Uses cachedMap lookup to preserve original object references from cachedFeedbacks during real-time sync.
+// Optimization: Uses module-scoped cachedFeedbacksMap lookup to preserve original object references from cachedFeedbacks during real-time sync,
+// eliminating transient Map instantiations and population loops on every sanitization pass.
 const sanitizeFeedbackArray = (arr) => {
-  if (!Array.isArray(arr)) return INITIAL_FEEDBACKS;
-  const sliced = arr.slice(0, 100);
-
-  // Optimization: Populate Map directly with a for loop to avoid allocating N 2-element key-value arrays
-  // and 1 wrapper array via .map(...) on every feedback array sanitization pass during real-time sync.
-  let cachedMap = null;
-  if (cachedFeedbacks && Array.isArray(cachedFeedbacks)) {
-    cachedMap = new Map();
-    for (let i = 0; i < cachedFeedbacks.length; i++) {
-      const item = cachedFeedbacks[i];
-      if (item && item.id) {
-        cachedMap.set(item.id, item);
-      }
-    }
+  if (!Array.isArray(arr)) {
+    setCachedFeedbacks(INITIAL_FEEDBACKS);
+    return INITIAL_FEEDBACKS;
   }
+  const sliced = arr.slice(0, 100);
 
   let changedFromInput = arr.length !== sliced.length;
   const result = [];
   for (let i = 0; i < sliced.length; i++) {
-    const cachedItem = cachedMap ? cachedMap.get(sliced[i]?.id) : null;
+    const cachedItem = cachedFeedbacksMap ? cachedFeedbacksMap.get(sliced[i]?.id) : null;
     const item = sanitizeFeedbackItem(sliced[i], cachedItem);
     if (item !== sliced[i]) changedFromInput = true;
     if (item) result.push(item);
@@ -225,9 +233,11 @@ const sanitizeFeedbackArray = (arr) => {
 
   // Optimization: If result matches input arr element-by-element, reuse input arr reference
   if (!changedFromInput && result.length === arr.length) {
+    setCachedFeedbacks(arr);
     return arr;
   }
 
+  setCachedFeedbacks(result);
   return result;
 };
 
@@ -266,14 +276,14 @@ export const getStoredFeedbacks = () => {
     const raw = localStorage.getItem(STORAGE_KEY_FEEDBACKS);
     if (!raw) {
       localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(INITIAL_FEEDBACKS));
-      cachedFeedbacks = INITIAL_FEEDBACKS;
+      setCachedFeedbacks(INITIAL_FEEDBACKS);
       return INITIAL_FEEDBACKS;
     }
     const parsed = JSON.parse(raw);
-    cachedFeedbacks = sanitizeFeedbackArray(parsed);
-    return cachedFeedbacks;
+    const sanitized = sanitizeFeedbackArray(parsed);
+    return sanitized;
   } catch {
-    cachedFeedbacks = INITIAL_FEEDBACKS;
+    setCachedFeedbacks(INITIAL_FEEDBACKS);
     return INITIAL_FEEDBACKS;
   }
 };
@@ -281,7 +291,6 @@ export const getStoredFeedbacks = () => {
 export const saveFeedbacks = (feedbacks) => {
   try {
     const sanitized = sanitizeFeedbackArray(feedbacks);
-    cachedFeedbacks = sanitized;
     localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(sanitized));
     if (channel) channel.postMessage({ type: "FEEDBACKS_UPDATED", payload: sanitized });
   } catch (e) {
@@ -370,7 +379,7 @@ export const updateFeedbackStatus = (id, newStatus, note = "") => {
 };
 
 export const resetToSeedData = () => {
-  cachedFeedbacks = INITIAL_FEEDBACKS;
+  setCachedFeedbacks(INITIAL_FEEDBACKS);
   cachedSettings = INITIAL_SETTINGS;
   localStorage.setItem(STORAGE_KEY_FEEDBACKS, JSON.stringify(INITIAL_FEEDBACKS));
   localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(INITIAL_SETTINGS));
@@ -391,7 +400,7 @@ export const subscribeToRealtime = (callback) => {
         cachedSettings = sanitized;
         callback({ type, payload: sanitized });
       } else if (type === "RESET_ALL") {
-        cachedFeedbacks = INITIAL_FEEDBACKS;
+        setCachedFeedbacks(INITIAL_FEEDBACKS);
         cachedSettings = INITIAL_SETTINGS;
         callback({ type });
       }
@@ -403,10 +412,9 @@ export const subscribeToRealtime = (callback) => {
       try {
         const parsed = JSON.parse(event.newValue || "[]");
         const sanitized = sanitizeFeedbackArray(parsed);
-        cachedFeedbacks = sanitized;
         callback({ type: "FEEDBACKS_UPDATED", payload: sanitized });
       } catch {
-        cachedFeedbacks = [];
+        setCachedFeedbacks([]);
         callback({ type: "FEEDBACKS_UPDATED", payload: [] });
       }
     } else if (event.key === STORAGE_KEY_SETTINGS) {

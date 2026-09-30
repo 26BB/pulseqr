@@ -60,12 +60,7 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
     icon: Rocket,
     badge: '₹500 Budget',
     summary: 'Low-cost, high-hustle go-to-market strategy using direct ground sales in Pune.',
-    content: `## Ground GTM Motion (Pune)
-- **Day 1–3: The Koregaon Park Blitz:**
-  - Walk into 15 cafes during slow hours (3:00 PM – 5:00 PM) when owners/head baristas are free.
-  - Offer a free acrylic table standee with custom branding and a 14-day zero-risk pilot.
-- **Day 4–7: The WhatsApp Value Proof:**
-  - Demonstrate the first intercepted negative review to the owner on WhatsApp. Once an owner sees an angry customer turned into a loyal fan with a comped cookie, they never cancel.`
+    content: `## Ground GTM Motion (Pune)\n- **Day 1–3: The Koregaon Park Blitz:**\n  - Walk into 15 cafes during slow hours (3:00 PM – 5:00 PM) when owners/head baristas are free.\n  - Offer a free acrylic table standee with custom branding and a 14-day zero-risk pilot.\n- **Day 4–7: The WhatsApp Value Proof:**\n  - Demonstrate the first intercepted negative review to the owner on WhatsApp. Once an owner sees an angry customer turned into a loyal fan with a comped cookie, they never cancel.`
   },
   {
     id: 'metrics',
@@ -73,12 +68,7 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
     icon: BarChart2,
     badge: 'Analytics Spec',
     summary: 'Instrumentation specification for tracking diner scans, drop-offs, and floor interventions.',
-    content: `## AARRR Funnel Tracking
-- **Acquisition:** Physical QR Scan on table standee (UTM table tagged: \`?table=04\`).
-- **Activation:** Diner completes form and reveals 10% coupon code.
-- **Retention:** Diner re-scans on subsequent visit using loyalty incentive.
-- **Referral:** 5-star diners are seamlessly prompted to copy positive reviews to Google Maps.
-- **Revenue:** SaaS subscription of ₹999/month per outlet after 14-day trial.`
+    content: `## AARRR Funnel Tracking\n- **Acquisition:** Physical QR Scan on table standee (UTM table tagged: \`?table=04\`).\n- **Activation:** Diner completes form and reveals 10% coupon code.\n- **Retention:** Diner re-scans on subsequent visit using loyalty incentive.\n- **Referral:** 5-star diners are seamlessly prompted to copy positive reviews to Google Maps.\n- **Revenue:** SaaS subscription of ₹999/month per outlet after 14-day trial.`
   },
   {
     id: 'defense',
@@ -86,16 +76,7 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
     icon: ShieldCheck,
     badge: 'Interview Cheat Sheet',
     summary: 'Winning answers to tough questions from startup founders and hiring managers.',
-    content: `## 30-Second Elevator Pitch
-"Most PM applicants just write docs in a vacuum—I actually build and sell. I created PulseQR, walked into cafes in Koregaon Park, and convinced Brew & Beans to deploy it. We drove real feedback that changed their operations. I know how to go from 0 to 1, do dirty ground sales, and iterate fast."
-
-## Top 3 Interview Traps & Winning Responses
-1. **"QR tools are a commodity. Why build this?"**
-   *"The tech was a sandbox for the GTM motion. Getting a cafe owner to care and place standees is 10x harder than writing the code."*
-2. **"What broke during the pilot?"**
-   *"Context matters more than UI. Table standees had low conversion until we moved the QR prompt to the final bill folder."*
-3. **"What metric mattered most?"**
-   *"Not scans—'Changes Implemented'. If the owner didn't adjust barista training or AC temperature based on the data, the product had no value."*`
+    content: `## 30-Second Elevator Pitch\n\"Most PM applicants just write docs in a vacuum—I actually build and sell. I created PulseQR, walked into cafes in Koregaon Park, and convinced Brew & Beans to deploy it. We drove real feedback that changed their operations. I know how to go from 0 to 1, do dirty ground sales, and iterate fast.\"\n\n## Top 3 Interview Traps & Winning Responses\n1. **\"QR tools are a commodity. Why build this?\"**\n   *\"The tech was a sandbox for the GTM motion. Getting a cafe owner to care and place standees is 10x harder than writing the code.\"*\n2. **\"What broke during the pilot?\"**\n   *\"Context matters more than UI. Table standees had low conversion until we moved the QR prompt to the final bill folder.\"*\n3. **\"What metric mattered most?\"**\n   *\"Not scans—'Changes Implemented'. If the owner didn't adjust barista training or AC temperature based on the data, the product had no value.\"*`
   },
   {
     id: 'testing',
@@ -103,10 +84,7 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
     icon: CheckSquare,
     badge: 'E2E Verified',
     summary: 'End-to-End coverage report including cross-tab BroadcastChannel sync and edge cases.',
-    content: `## Test Coverage Summary
-- **Build Verification:** Vite production bundle passes in 1.02s with zero warnings.
-- **Cross-Tab Realtime:** Verified \`BroadcastChannel\` message passing between Diner tab and Admin dashboard.
-- **Alert Boundary:** Verified rating threshold $\\le 2$ stars triggers the damage control drawer and suppresses celebratory confetti.`
+    content: `## Test Coverage Summary\n- **Build Verification:** Vite production bundle passes in 1.02s with zero warnings.\n- **Cross-Tab Realtime:** Verified \`BroadcastChannel\` message passing between Diner tab and Admin dashboard.\n- **Alert Boundary:** Verified rating threshold $\\le 2$ stars triggers the damage control drawer and suppresses celebratory confetti.`
   }
 ];
 
@@ -139,6 +117,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close documentation hub"
             className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 cursor-pointer"
           >
             <X className="w-5 h-5" />

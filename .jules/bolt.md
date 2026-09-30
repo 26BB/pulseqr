@@ -29,3 +29,7 @@
 ## 2026-10-05 - Form Control Re-render Isolation
 **Learning:** High-frequency input state changes (e.g., text comment keypresses) in a parent form component re-render all inline child controls (emoji rating buttons, preset tag chips) on every character typed unless those interactive controls are isolated into `React.memo` components with `useCallback` handlers.
 **Action:** Extract static or category-level form controls into memoized sub-components and pass `useCallback` event handlers so high-frequency text input state updates don't cause child button re-renders.
+
+## 2026-10-10 - Persistent Module-Scoped Lookup Map Caching
+**Learning:** Constructing a new Map inside hot sanitization functions on every array processing pass creates transient object allocations and GC pressure during real-time BroadcastChannel or storage sync events, even when using direct `for` loops.
+**Action:** Maintain module-scoped Map instances alongside cached state and update them only when cached state changes so sanitization functions can re-use existing lookup Maps without per-invocation Map instantiations.

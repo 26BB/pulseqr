@@ -32,10 +32,12 @@ const EmojiRatingCategory = memo(function EmojiRatingCategory({ title, category,
         </span>
       </div>
       <div className="flex justify-between items-center px-1">
-        {EMOJIS.map((e) => (\n          <button
+        {EMOJIS.map((e) => (
+          <button
             key={e.val}
             type="button"
-            aria-label={e.label}
+            aria-label={`${e.label} (${e.val} out of 5 stars)`}
+            aria-pressed={value === e.val}
             onClick={() => onRating(category, e.val)}
             className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer ${
               value === e.val
@@ -57,6 +59,8 @@ const PresetTagChip = memo(function PresetTagChip({ tag, isSelected, onToggle })
   return (
     <button
       type="button"
+      aria-pressed={isSelected}
+      aria-label={`Toggle tag: ${tag}`}
       onClick={() => onToggle(tag)}
       className={`px-2 py-0.5 rounded-full font-bold transition-colors cursor-pointer ${
         isSelected
@@ -64,8 +68,8 @@ const PresetTagChip = memo(function PresetTagChip({ tag, isSelected, onToggle })
           : 'bg-[#FFF4EE] text-[#6B584F] hover:bg-[#FFE8DD]'
       }`}
     >
-      {tag}
-    </button>
+      {tag
+    }</button>
   );
 });
 

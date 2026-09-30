@@ -48,7 +48,8 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          aria-label="Close feedback details"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -67,11 +68,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
               <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
                 Feedback Details • Table #{feedback.table}
               </h3>
-              {isAlert && (
-                <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">
-                  NEEDS ATTENTION
-                </span>
-              )}
+              {isAlert && (\n                <span className=\"bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse\">\n                  NEEDS ATTENTION\n                </span>\n              )}
             </div>
             <div className="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
               <span className="flex items-center gap-1">
