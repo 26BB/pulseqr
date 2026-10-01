@@ -23,8 +23,9 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   const defaultWhatsAppText = `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
 
   const handleWhatsAppClick = () => {
+    // Security: Validate and sanitize phone digits to prevent open redirection or invalid wa.me protocol parameters
     let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '').slice(0, 15);
-    if (!phoneDigits) return; // Security: Prevent open redirection or invalid wa.me endpoint if phone is missing/invalid
+    if (!phoneDigits || phoneDigits.length < 7) return;
     if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
     }
@@ -68,7 +69,11 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
               <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
                 Feedback Details • Table #{feedback.table}
               </h3>
-              {isAlert && (\n                <span className=\"bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse\">\n                  NEEDS ATTENTION\n                </span>\n              )}
+              {isAlert && (
+                <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                  NEEDS ATTENTION
+                </span>
+              )}
             </div>
             <div className="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
               <span className="flex items-center gap-1">
