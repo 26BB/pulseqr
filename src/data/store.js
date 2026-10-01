@@ -39,10 +39,12 @@ const sanitizeRating = (val) => {
   return Math.min(5, Math.max(1, Math.round(num)));
 };
 
-// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat
+// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat & control character injection
 const sanitizeString = (str, maxLen = 100, fallback = "") => {
   if (typeof str !== "string") return fallback;
-  return str.trim().slice(0, maxLen);
+  // eslint-disable-next-line no-control-regex
+  const cleaned = str.replace(/[\r\n\t\x00-\x1F\x7F]/g, " ").trim();
+  return cleaned.slice(0, maxLen) || fallback;
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
