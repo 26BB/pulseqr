@@ -39,10 +39,13 @@ const sanitizeRating = (val) => {
   return Math.min(5, Math.max(1, Math.round(num)));
 };
 
-// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat
+// Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat and control character injection
 const sanitizeString = (str, maxLen = 100, fallback = "") => {
   if (typeof str !== "string") return fallback;
-  return str.trim().slice(0, maxLen);
+  // Security: Strip non-printable ASCII control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F, \x7F)
+  // eslint-disable-next-line no-control-regex
+  const clean = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
+  return clean.slice(0, maxLen);
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
@@ -100,7 +103,9 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
 
   const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
   const id = sanitizeString(fb.id, 50, `fb-${Date.now()}`);
-  const table = sanitizeString(fb.table, 10, "04") || "04";
+  // Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection
+  const rawTable = sanitizeString(fb.table, 10, "04");
+  const table = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
   const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
   const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
   const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
@@ -328,9 +333,12 @@ export const addFeedback = (feedbackData) => {
     ? crypto.randomUUID().slice(0, 8)
     : Math.random().toString(36).slice(2, 7);
 
+  const rawTable = sanitizeString(feedbackData?.table, 10, "04");
+  const safeTable = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
+
   const newEntry = {
     id: `fb-${Date.now()}-${idSuffix}`,
-    table: sanitizeString(feedbackData?.table, 10, "04") || "04",
+    table: safeTable,
     timestamp: new Date().toISOString(),
     displayTime: "Just now",
     ratings,
