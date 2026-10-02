@@ -68,7 +68,11 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
               <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
                 Feedback Details • Table #{feedback.table}
               </h3>
-              {isAlert && (\n                <span className=\"bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse\">\n                  NEEDS ATTENTION\n                </span>\n              )}
+              {isAlert && (
+                <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                  NEEDS ATTENTION
+                </span>
+              )}
             </div>
             <div className="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
               <span className="flex items-center gap-1">
