@@ -49,10 +49,25 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
-// Optimization: If the input object already matches all sanitized properties, return the original object reference
-// to maintain object reference identity, preventing unnecessary React component re-renders when consumed by React.memo components.
+// Optimization: Fast-path comparison against cachedSettings/input obj to avoid running redundant string regexes & number rounding on every pass.
 const sanitizeSettings = (obj) => {
   if (!obj || typeof obj !== "object") return INITIAL_SETTINGS;
+
+  // Optimization: Fast-path check against cachedSettings
+  if (
+    cachedSettings &&
+    cachedSettings.cafeName === obj.cafeName &&
+    cachedSettings.branch === obj.branch &&
+    cachedSettings.address === obj.address &&
+    cachedSettings.ownerName === obj.ownerName &&
+    cachedSettings.ownerPhone === obj.ownerPhone &&
+    cachedSettings.discountCode === obj.discountCode &&
+    cachedSettings.alertThreshold === obj.alertThreshold &&
+    cachedSettings.tableCount === obj.tableCount
+  ) {
+    return cachedSettings;
+  }
+
   const cafeName = sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName);
   const branch = sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch);
   const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
@@ -92,10 +107,45 @@ const sanitizeSettings = (obj) => {
 const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 
 // Helper to validate and sanitize individual feedback objects (Security: Deep input validation & truncation)
-// Optimization: Checks if input properties already match sanitized outputs and reuses original object & array references
-// (including existing items in cachedFeedbacks) to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
+// Optimization: Short-circuit validation against existingItem before executing string regexes, number clamping,
+// and tag array allocations to eliminate redundant computation during real-time BroadcastChannel & LocalStorage events.
 const sanitizeFeedbackItem = (fb, existingItem = null) => {
   if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
+
+  // Optimization: Fast-path check against cached existingItem to bypass string regexes, rating clamping,
+  // date formatting, and tag array allocations when the incoming entity matches the cached state.
+  if (existingItem) {
+    const exRatings = existingItem.ratings;
+    const fbRatings = fb.ratings;
+    const exTags = existingItem.tags;
+    const fbTags = fb.tags;
+
+    const tagsMatchFast =
+      Array.isArray(exTags) &&
+      Array.isArray(fbTags) &&
+      exTags.length === fbTags.length &&
+      exTags.every((t, idx) => t === fbTags[idx]);
+
+    if (
+      tagsMatchFast &&
+      existingItem.id === fb.id &&
+      existingItem.table === fb.table &&
+      existingItem.timestamp === fb.timestamp &&
+      existingItem.displayTime === fb.displayTime &&
+      existingItem.comment === fb.comment &&
+      existingItem.status === fb.status &&
+      existingItem.barista === fb.barista &&
+      existingItem.guestName === fb.guestName &&
+      existingItem.isAlert === fb.isAlert &&
+      existingItem.resolutionNote === fb.resolutionNote &&
+      existingItem.overallScore === fb.overallScore &&
+      exRatings?.food === fbRatings?.food &&
+      exRatings?.service === fbRatings?.service &&
+      exRatings?.ambiance === fbRatings?.ambiance
+    ) {
+      return existingItem;
+    }
+  }
 
   const food = sanitizeRating(fb.ratings?.food);
   const service = sanitizeRating(fb.ratings?.service);
@@ -135,7 +185,7 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
     }
   }
 
-  // Optimization: If an existing cached item matches all sanitized properties, return existingItem to preserve object identity across BroadcastChannel / localStorage JSON.parse events
+  // Fallback check if existingItem didn't hit fast-path (e.g. data was sanitized during processing)
   if (existingItem) {
     const tagsMatch =
       Array.isArray(existingItem.tags) &&
