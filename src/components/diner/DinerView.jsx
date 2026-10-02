@@ -335,16 +335,17 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                   </div>
                   <button
                     onClick={handleCopyCode}
-                    className="w-full bg-white hover:bg-slate-50 text-[#251912] text-xs font-bold py-2 rounded-xl border border-[#FFD700] transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+                    aria-live="polite"
+                    className="w-full bg-white hover:bg-slate-50 text-[#251912] text-xs font-bold py-2 rounded-xl border border-[#FFD700] transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#FF6B4A]"
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
                         <span>Copied to Clipboard!</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5 text-slate-500" />
+                        <Copy className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                         <span>Copy Code to Show Server</span>
                       </>
                     )}
