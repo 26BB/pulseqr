@@ -57,7 +57,9 @@ const sanitizeSettings = (obj) => {
   const branch = sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch);
   const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
   const ownerName = sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName);
-  const ownerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
+  // Security: Whitelist valid phone number characters (digits, +, spaces, hyphens, parens) to prevent protocol injection or malformed input
+  const rawOwnerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
+  const ownerPhone = rawOwnerPhone.replace(/[^\d+\s()-]/g, '') || INITIAL_SETTINGS.ownerPhone;
   // Security: Sanitize discountCode to alphanumeric, hyphens, and underscores to prevent injection / malformed codes from cross-tab sync or LocalStorage
   const rawDiscountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
   const discountCode = rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode;
