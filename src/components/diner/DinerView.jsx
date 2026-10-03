@@ -39,7 +39,7 @@ const EmojiRatingCategory = memo(function EmojiRatingCategory({ title, category,
             aria-label={`${e.label} (${e.val} out of 5 stars)`}
             aria-pressed={value === e.val}
             onClick={() => onRating(category, e.val)}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer ${
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center text-2xl p-1.5 rounded-xl transition-all transform cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A] ${
               value === e.val
                 ? 'scale-125 bg-[#FFF4EE] shadow-sm'
                 : 'opacity-65 hover:opacity-100 hover:scale-110'
@@ -62,7 +62,7 @@ const PresetTagChip = memo(function PresetTagChip({ tag, isSelected, onToggle })
       aria-pressed={isSelected}
       aria-label={`Toggle tag: ${tag}`}
       onClick={() => onToggle(tag)}
-      className={`px-2 py-0.5 rounded-full font-bold transition-colors cursor-pointer ${
+      className={`px-2 py-0.5 rounded-full font-bold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A] ${
         isSelected
           ? 'bg-[#FFD700] text-[#251912]'
           : 'bg-[#FFF4EE] text-[#6B584F] hover:bg-[#FFE8DD]'
@@ -285,13 +285,17 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                 {/* Comment */}
                 <div className="mb-3">
                   {/* Security: Enforce input length limit to prevent excessive payload / LocalStorage DoS */}
+                  <label htmlFor="diner-comment" className="sr-only">
+                    Optional note for Rohan and team
+                  </label>
                   <input
+                    id="diner-comment"
                     type="text"
                     maxLength={500}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Optional note for Rohan & team..."
-                    className="w-full bg-[#FFFDF9] border border-[#EADFD7] rounded-xl px-3 py-1.5 text-xs text-[#251912] placeholder-[#998A82] focus:outline-none focus:border-[#FF6B4A]"
+                    className="w-full bg-[#FFFDF9] border border-[#EADFD7] rounded-xl px-3 py-1.5 text-xs text-[#251912] placeholder-[#998A82] focus:outline-none focus:border-[#FF6B4A] focus-visible:ring-2 focus-visible:ring-[#FF6B4A]"
                   />
                 </div>
 
