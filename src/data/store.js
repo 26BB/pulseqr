@@ -361,12 +361,16 @@ export const addFeedback = (feedbackData) => {
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const current = getStoredFeedbacks();
+  // Security: Validate id input type and sanitize note / status parameters against injection and state corruption
+  const safeId = typeof id === "string" ? id : String(id || "");
+  if (!safeId) return current;
+
   const safeNote = sanitizeString(note, 500, "");
   const safeStatus = VALID_STATUSES.includes(newStatus) ? newStatus : "ACKNOWLEDGED";
 
   let changed = false;
   const updated = current.map((fb) => {
-    if (fb.id === id) {
+    if (fb.id === safeId) {
       const targetNote = safeNote || fb.resolutionNote;
       if (fb.status !== safeStatus || fb.resolutionNote !== targetNote) {
         changed = true;
