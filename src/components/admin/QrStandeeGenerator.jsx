@@ -26,7 +26,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
   // Optimization: Memoize diner URL calculation per selected table to avoid URL parsing and string concatenation on every render
   const dinerUrl = useMemo(() => {
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?view=diner&table=${selectedTable}`;
+    return `${baseUrl}?view=diner&table=${encodeURIComponent(selectedTable)}`;
   }, [selectedTable]);
 
   const handlePrint = () => {

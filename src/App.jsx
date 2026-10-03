@@ -110,8 +110,8 @@ export default function App() {
   }, []);
 
   const handleSaveSettings = useCallback((newSettings) => {
-    saveSettings(newSettings);
-    setSettings(newSettings);
+    const sanitized = saveSettings(newSettings);
+    setSettings(sanitized);
   }, []);
 
   const handleResetData = useCallback(() => {

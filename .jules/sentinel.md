@@ -8,3 +8,8 @@
 **Vulnerability:** Processing untrusted, unbounded array payloads from cross-tab BroadcastChannel events or LocalStorage triggers main-thread CPU / memory exhaustion.
 **Learning:** Real-time synchronized apps without a backend must slice and truncate array payloads before mapping sanitization helpers.
 **Prevention:** Always cap array payload length (`arr.slice(0, MAX_LIMIT)`) in array sanitization methods.
+
+## 2026-09-13 - Return Sanitized Objects for Immediate Local State Updates
+**Vulnerability:** Persistence functions sanitizing input objects for storage/broadcast but returning undefined allowed caller handlers to populate local React state with raw, unsanitized input objects.
+**Learning:** In client-side state sync architectures, store persistence functions must return the sanitized object so local React state immediately reflects sanitized boundaries without awaiting storage events.
+**Prevention:** Always return the sanitized payload from store persistence functions and pass the returned result to React state updaters.
