@@ -7,21 +7,20 @@ const STORAGE_KEY_SETTINGS = "pulseqr_settings_v1";
 // Optimization: In-memory store cache prevents synchronous main-thread localStorage disk reads and JSON.parse on every mutation
 let cachedFeedbacks = null;
 let cachedSettings = null;
-let cachedFeedbacksMap = null;
+// Persistent module-scoped Map avoids transient object instantiations and GC pressure during state updates
+const cachedFeedbacksMap = new Map();
 
-// Helper to update cachedFeedbacks and maintain module-scoped lookup Map
+// Helper to update cachedFeedbacks and maintain module-scoped lookup Map without re-instantiating Map instances
 const setCachedFeedbacks = (feedbacks) => {
   cachedFeedbacks = feedbacks;
+  cachedFeedbacksMap.clear();
   if (Array.isArray(feedbacks)) {
-    cachedFeedbacksMap = new Map();
     for (let i = 0; i < feedbacks.length; i++) {
       const item = feedbacks[i];
       if (item && item.id) {
         cachedFeedbacksMap.set(item.id, item);
       }
     }
-  } else {
-    cachedFeedbacksMap = null;
   }
 };
 
@@ -96,6 +95,12 @@ const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 // (including existing items in cachedFeedbacks) to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
 const sanitizeFeedbackItem = (fb, existingItem = null) => {
   if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
+
+  // Optimization: Fast-path identity check. If fb is identical to existingItem (already sanitized and cached in memory),
+  // return immediately to bypass redundant string parsing, regexes, ISO date creation, and tag array allocations.
+  if (existingItem && fb === existingItem) {
+    return existingItem;
+  }
 
   const food = sanitizeRating(fb.ratings?.food);
   const service = sanitizeRating(fb.ratings?.service);
@@ -221,7 +226,7 @@ const sanitizeFeedbackArray = (arr) => {
   let changedFromInput = arr.length !== sliced.length;
   const result = [];
   for (let i = 0; i < sliced.length; i++) {
-    const cachedItem = cachedFeedbacksMap ? cachedFeedbacksMap.get(sliced[i]?.id) : null;
+    const cachedItem = cachedFeedbacksMap.get(sliced[i]?.id);
     const item = sanitizeFeedbackItem(sliced[i], cachedItem);
     if (item !== sliced[i]) changedFromInput = true;
     if (item) result.push(item);
