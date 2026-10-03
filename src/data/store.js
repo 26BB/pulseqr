@@ -270,8 +270,10 @@ export const saveSettings = (newSettings) => {
     cachedSettings = sanitizedSettings;
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(sanitizedSettings));
     if (channel) channel.postMessage({ type: "SETTINGS_UPDATED", payload: sanitizedSettings });
+    return sanitizedSettings;
   } catch (e) {
     console.error("Failed to save settings", e);
+    return getStoredSettings();
   }
 };
 
