@@ -1,9 +1,18 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Clock, User, Coffee } from 'lucide-react';
 
 // Optimization: Memoize FeedbackDetailModal to prevent unnecessary re-renders when parent state updates while viewing modal details
 const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
   const [note, setNote] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!feedback) return null;
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
 
@@ -44,7 +53,12 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feedback-modal-title"
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto"
+      >
         
         {/* Close Button */}
         <button
@@ -66,7 +80,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
+              <h3 id="feedback-modal-title" className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
                 Feedback Details • Table #{feedback.table}
               </h3>
               {isAlert && (
