@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Printer, Download, ShieldCheck } from 'lucide-react';
 
@@ -16,6 +16,14 @@ const QR_IMAGE_SETTINGS = {
 const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
   const totalTables = settings?.tableCount || 15;
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   // Optimization: Memoize tablesList generation so array is re-created only when tableCount changes
   const tablesList = useMemo(
@@ -35,7 +43,12 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative my-auto">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="qr-standee-modal-title"
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative my-auto"
+      >
         
         {/* Header Bar */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
@@ -44,7 +57,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
               🖨️
             </div>
             <div>
-              <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
+              <h3 id="qr-standee-modal-title" className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
                 Acrylic Table Standee & QR Generator
               </h3>
               <p className="text-xs text-slate-500">
