@@ -3,7 +3,8 @@ import { Save, MessageSquare, ShieldAlert, Coffee, RotateCcw, Check } from 'luci
 
 // Optimization: Memoize SettingsView to prevent re-renders when parent state (e.g., feedbacks) updates while settings tab is active
 const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onResetData }) {
-  const [formData, setFormData] = useState({ ...settings });
+  // Optimization: Lazy state initializer prevents shallow-copy object allocation on every re-render
+  const [formData, setFormData] = useState(() => ({ ...settings }));
   const [saved, setSaved] = useState(false);
 
   const handleChange = (field, val) => {

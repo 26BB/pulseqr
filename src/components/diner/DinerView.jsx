@@ -20,6 +20,9 @@ const PRESET_TAGS = [
   'Slow Service ⏰',
 ];
 
+// Optimization: Module-scoped constant for initial ratings state avoids object literal allocation on every re-render
+const INITIAL_RATINGS = { food: 5, service: 5, ambiance: 4 };
+
 // Optimization: Memoized rating category row isolates emoji button rendering from parent text input state (e.g. comment typing),
 // preventing 15 button element re-renders per character typed on mobile devices.
 const EmojiRatingCategory = memo(function EmojiRatingCategory({ title, category, value, onRating }) {
@@ -76,8 +79,9 @@ const PresetTagChip = memo(function PresetTagChip({ tag, isSelected, onToggle })
 // Optimization: Memoize DinerView to skip re-renders when parent App state updates (e.g. feedback array sync, demo bar clicks)
 const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, settings }) {
   const [step, setStep] = useState('welcome'); // 'welcome' | 'form' | 'success'
-  const [ratings, setRatings] = useState({ food: 5, service: 5, ambiance: 4 });
-  const [selectedTags, setSelectedTags] = useState([]);
+  // Optimization: Module constant & lazy state initializer prevent transient object/array allocations on every re-render (e.g. when typing comments)
+  const [ratings, setRatings] = useState(INITIAL_RATINGS);
+  const [selectedTags, setSelectedTags] = useState(() => []);
   const [comment, setComment] = useState('');
   const [copied, setCopied] = useState(false);
   const [lastSubmissionAlert, setLastSubmissionAlert] = useState(false);
@@ -140,7 +144,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
 
   const handleReset = () => {
     setStep('welcome');
-    setRatings({ food: 5, service: 5, ambiance: 4 });
+    setRatings(INITIAL_RATINGS);
     setSelectedTags([]);
     setComment('');
     setLastSubmissionAlert(false);
