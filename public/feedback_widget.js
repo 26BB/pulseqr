@@ -9,13 +9,13 @@
   const MAX_ERRORS = 10;
 
   window.addEventListener('error', function (event) {
+    // Security: Omit internal stack traces to prevent leaking source code structure and internal details
     capturedErrors.push({
       type: 'uncaught_error',
-      message: event.message,
-      filename: event.filename,
+      message: event.message ? String(event.message).slice(0, 200) : 'Uncaught exception',
+      filename: event.filename ? String(event.filename).slice(0, 100) : '',
       lineno: event.lineno,
       colno: event.colno,
-      stack: event.error ? event.error.stack : null,
       time: new Date().toISOString()
     });
     if (capturedErrors.length > MAX_ERRORS) capturedErrors.shift();
