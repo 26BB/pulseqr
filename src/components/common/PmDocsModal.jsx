@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { X, Target, Users, Rocket, BarChart2, ShieldCheck, CheckSquare, FileText } from 'lucide-react';
 
 const DOCS_LIST = [
@@ -93,9 +93,22 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
   const [activeDocId, setActiveDocId] = useState('prd');
   const activeDoc = DOCS_LIST.find((d) => d.id === activeDocId) || DOCS_LIST[0];
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-6 shadow-2xl relative my-auto border-2 border-[#FFD0B8] max-h-[90vh] flex flex-col">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pm-docs-modal-title"
+        className="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-6 shadow-2xl relative my-auto border-2 border-[#FFD0B8] max-h-[90vh] flex flex-col"
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
@@ -104,7 +117,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
               📚
             </div>
             <div>
-              <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+              <h3 id="pm-docs-modal-title" className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
                 <span>PulseQR — GTM & Product Documentation Hub</span>
                 <span className="bg-[#FFF4EE] text-[#FF6B4A] text-xs font-bold px-2 py-0.5 rounded-full border border-[#FF6B4A]/20">
                   Portfolio Ready
@@ -135,6 +148,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
               return (
                 <button
                   key={doc.id}
+                  aria-selected={isSelected}
                   onClick={() => setActiveDocId(doc.id)}
                   className={`w-full text-left p-3 rounded-2xl border transition-all cursor-pointer ${
                     isSelected
