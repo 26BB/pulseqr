@@ -113,10 +113,12 @@ const AdminDashboard = memo(function AdminDashboard({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+        <div role="tablist" aria-label="Admin Navigation Tabs" className="flex items-center bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
           <button
+            role="tab"
+            aria-selected={activeTab === 'live'}
             onClick={() => setActiveTab('live')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
               activeTab === 'live'
                 ? 'bg-[#4A90FF] text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -130,8 +132,10 @@ const AdminDashboard = memo(function AdminDashboard({
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'analytics'}
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
               activeTab === 'analytics'
                 ? 'bg-[#4A90FF] text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -142,8 +146,10 @@ const AdminDashboard = memo(function AdminDashboard({
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'settings'}
             onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
               activeTab === 'settings'
                 ? 'bg-[#4A90FF] text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -259,8 +265,9 @@ const AdminDashboard = memo(function AdminDashboard({
 
                 <div className="flex items-center gap-1.5 text-xs font-bold">
                   <button
+                    aria-pressed={filter === 'all'}
                     onClick={() => setFilter('all')}
-                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
                       filter === 'all'
                         ? 'bg-[#4A90FF] text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -270,8 +277,9 @@ const AdminDashboard = memo(function AdminDashboard({
                   </button>
 
                   <button
+                    aria-pressed={filter === 'alert'}
                     onClick={() => setFilter('alert')}
-                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
                       filter === 'alert'
                         ? 'bg-rose-600 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -281,8 +289,9 @@ const AdminDashboard = memo(function AdminDashboard({
                   </button>
 
                   <button
+                    aria-pressed={filter === '5star'}
                     onClick={() => setFilter('5star')}
-                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
                       filter === '5star'
                         ? 'bg-emerald-600 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -428,9 +437,11 @@ export default AdminDashboard;
 const FeedbackCard = React.memo(function FeedbackCard({ fb, onSelect }) {
   const isPendingAlert = fb.isAlert && fb.status === 'ALERT_TRIGGERED';
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onSelect(fb)}
-      className={`p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-md ${
+      aria-label={`Table ${fb.table} feedback, rated ${fb.overallScore} stars. ${fb.comment}`}
+      className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
         isPendingAlert
           ? 'bg-rose-50/90 border-rose-300 ring-2 ring-rose-200'
           : 'bg-slate-50/80 border-slate-200 hover:border-[#4A90FF]/50'
@@ -498,6 +509,6 @@ const FeedbackCard = React.memo(function FeedbackCard({ fb, onSelect }) {
           Barista: <strong className="text-slate-700">{fb.barista || 'Pranav'}</strong>
         </div>
       </div>
-    </div>
+    </button>
   );
 });
