@@ -53,19 +53,16 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
 // to maintain object reference identity, preventing unnecessary React component re-renders when consumed by React.memo components.
 const sanitizeSettings = (obj) => {
   if (!obj || typeof obj !== "object") return INITIAL_SETTINGS;
+  // Optimization: Reference identity fast-path skips string sanitization & regex replacements in O(1) time
+  if (cachedSettings && cachedSettings === obj) return cachedSettings;
+
   const cafeName = sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName);
   const branch = sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch);
   const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
   const ownerName = sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName);
-sentinel/sanitize-owner-phone-5444407246780960355
   // Security: Whitelist valid phone number characters (digits, +, spaces, hyphens, parens) to prevent protocol injection or malformed input
   const rawOwnerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
   const ownerPhone = rawOwnerPhone.replace(/[^\d+\s()-]/g, '') || INITIAL_SETTINGS.ownerPhone;
-
-  // Security: Restrict owner phone number to valid phone number characters
-  const rawOwnerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
-  const ownerPhone = rawOwnerPhone.replace(/[^0-9+\s()-]/g, '') || INITIAL_SETTINGS.ownerPhone;
- main
   // Security: Sanitize discountCode to alphanumeric, hyphens, and underscores to prevent injection / malformed codes from cross-tab sync or LocalStorage
   const rawDiscountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
   const discountCode = rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode;
@@ -104,6 +101,11 @@ const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 // (including existing items in cachedFeedbacks) to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
 const sanitizeFeedbackItem = (fb, existingItem = null) => {
   if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
+
+  // Optimization: If fb reference matches an existing already-sanitized cached item, return in O(1) time to bypass regex and allocation overhead
+  if (existingItem && existingItem === fb) {
+    return fb;
+  }
 
   const food = sanitizeRating(fb.ratings?.food);
   const service = sanitizeRating(fb.ratings?.service);
@@ -224,6 +226,11 @@ const sanitizeFeedbackArray = (arr) => {
     setCachedFeedbacks(INITIAL_FEEDBACKS);
     return INITIAL_FEEDBACKS;
   }
+  // Optimization: Reference identity fast-path skips array slicing, loop iterations, and item sanitization passes in O(1) time
+  if (cachedFeedbacks && cachedFeedbacks === arr) {
+    return cachedFeedbacks;
+  }
+
   const sliced = arr.slice(0, 100);
 
   let changedFromInput = arr.length !== sliced.length;
