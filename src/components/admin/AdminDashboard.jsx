@@ -427,10 +427,21 @@ export default AdminDashboard;
 // Optimization: Memoize FeedbackCard component to prevent unnecessary re-renders of list items when parent tab or modal states change
 const FeedbackCard = React.memo(function FeedbackCard({ fb, onSelect }) {
   const isPendingAlert = fb.isAlert && fb.status === 'ALERT_TRIGGERED';
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(fb);
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Table ${fb.table} feedback rating ${fb.overallScore} stars. ${fb.comment}`}
       onClick={() => onSelect(fb)}
-      className={`p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-md ${
+      onKeyDown={handleKeyDown}
+      className={`p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
         isPendingAlert
           ? 'bg-rose-50/90 border-rose-300 ring-2 ring-rose-200'
           : 'bg-slate-50/80 border-slate-200 hover:border-[#4A90FF]/50'
