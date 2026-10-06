@@ -1,7 +1,4 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
-import AnalyticsView from './AnalyticsView';
-import SettingsView from './SettingsView';
-import FeedbackDetailModal from './FeedbackDetailModal';
+import React, { useState, useMemo, useCallback, memo, lazy, Suspense } from 'react';
 import {
   Activity,
   BarChart3,
@@ -10,6 +7,12 @@ import {
   CheckCircle,
   QrCode,
 } from 'lucide-react';
+
+// Optimization: Code-split secondary admin tab views and modal overlay components using React.lazy
+// to reduce initial JS bundle size and defer parsing of analytics charts, settings forms, and modal logic.
+const AnalyticsView = lazy(() => import('./AnalyticsView'));
+const SettingsView = lazy(() => import('./SettingsView'));
+const FeedbackDetailModal = lazy(() => import('./FeedbackDetailModal'));
 
 // Optimization: Memoize AdminDashboard to prevent re-rendering when parent App re-renders (e.g. table parameter change, modal toggles) unless props change
 const AdminDashboard = memo(function AdminDashboard({
@@ -397,25 +400,33 @@ const AdminDashboard = memo(function AdminDashboard({
       )}
 
       {/* VIEW 2: AARRR FUNNEL & ANALYTICS */}
-      {activeTab === 'analytics' && <AnalyticsView feedbacks={feedbacks} />}
+      {activeTab === 'analytics' && (
+        <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading Analytics...</div>}>
+          <AnalyticsView feedbacks={feedbacks} />
+        </Suspense>
+      )}
 
       {/* VIEW 3: CAFE SETTINGS */}
       {activeTab === 'settings' && (
-        <SettingsView
-          settings={settings}
-          onSaveSettings={onSaveSettings}
-          onResetData={onResetData}
-        />
+        <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading Settings...</div>}>
+          <SettingsView
+            settings={settings}
+            onSaveSettings={onSaveSettings}
+            onResetData={onResetData}
+          />
+        </Suspense>
       )}
 
       {/* Feedback Detail Modal */}
       {selectedFeedback && (
-        <FeedbackDetailModal
-          feedback={selectedFeedback}
-          settings={settings}
-          onClose={handleCloseModal}
-          onResolve={handleResolveModal}
-        />
+        <Suspense fallback={null}>
+          <FeedbackDetailModal
+            feedback={selectedFeedback}
+            settings={settings}
+            onClose={handleCloseModal}
+            onResolve={handleResolveModal}
+          />
+        </Suspense>
       )}
 
     </div>

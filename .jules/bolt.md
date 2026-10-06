@@ -33,3 +33,7 @@
 ## 2026-10-10 - Persistent Module-Scoped Lookup Map Caching
 **Learning:** Constructing a new Map inside hot sanitization functions on every array processing pass creates transient object allocations and GC pressure during real-time BroadcastChannel or storage sync events, even when using direct `for` loops.
 **Action:** Maintain module-scoped Map instances alongside cached state and update them only when cached state changes so sanitization functions can re-use existing lookup Maps without per-invocation Map instantiations.
+
+## 2026-10-15 - Secondary Admin Tab and Modal Code Splitting
+**Learning:** Static imports of secondary view tabs (`AnalyticsView`, `SettingsView`) and modal overlays (`FeedbackDetailModal`) inside parent container components bloat the main JS entry chunk and delay initial page load/execution even though these components are only rendered conditionally on user interaction.
+**Action:** Wrap secondary tab views and modal overlays in `React.lazy` dynamic imports and `<Suspense>` boundaries to shrink main bundle size and defer JS parsing until the component is explicitly requested.

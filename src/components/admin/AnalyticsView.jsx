@@ -15,9 +15,9 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
 
     for (let i = 0; i < total; i++) {
       const f = feedbacks[i];
-      foodSum += f.ratings.food;
-      serviceSum += f.ratings.service;
-      ambianceSum += f.ratings.ambiance;
+      foodSum += f.ratings?.food || 0;
+      serviceSum += f.ratings?.service || 0;
+      ambianceSum += f.ratings?.ambiance || 0;
     }
 
     return {
