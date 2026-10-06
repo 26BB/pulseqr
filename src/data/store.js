@@ -53,6 +53,9 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
 // to maintain object reference identity, preventing unnecessary React component re-renders when consumed by React.memo components.
 const sanitizeSettings = (obj) => {
   if (!obj || typeof obj !== "object") return INITIAL_SETTINGS;
+  // Optimization: Reference identity fast-path skips string sanitization & regex replacements in O(1) time
+  if (cachedSettings && cachedSettings === obj) return cachedSettings;
+
   const cafeName = sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName);
   const branch = sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch);
   const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
@@ -98,6 +101,11 @@ const VALID_STATUSES = ["ACKNOWLEDGED", "ALERT_TRIGGERED", "RESOLVED"];
 // (including existing items in cachedFeedbacks) to preserve object identity across real-time storage/broadcast events, enabling React.memo (e.g. FeedbackCard) to skip re-renders.
 const sanitizeFeedbackItem = (fb, existingItem = null) => {
   if (!fb || typeof fb !== "object" || typeof fb.id !== "string") return null;
+
+  // Optimization: If fb reference matches an existing already-sanitized cached item, return in O(1) time to bypass regex and allocation overhead
+  if (existingItem && existingItem === fb) {
+    return fb;
+  }
 
   const food = sanitizeRating(fb.ratings?.food);
   const service = sanitizeRating(fb.ratings?.service);
@@ -218,6 +226,11 @@ const sanitizeFeedbackArray = (arr) => {
     setCachedFeedbacks(INITIAL_FEEDBACKS);
     return INITIAL_FEEDBACKS;
   }
+  // Optimization: Reference identity fast-path skips array slicing, loop iterations, and item sanitization passes in O(1) time
+  if (cachedFeedbacks && cachedFeedbacks === arr) {
+    return cachedFeedbacks;
+  }
+
   const sliced = arr.slice(0, 100);
 
   let changedFromInput = arr.length !== sliced.length;
