@@ -45,7 +45,7 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
   // Security: Strip non-printable ASCII control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F, \x7F)
   // eslint-disable-next-line no-control-regex
   const clean = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
-  return clean.slice(0, maxLen);
+  return clean ? clean.slice(0, maxLen) : fallback;
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
@@ -112,7 +112,8 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   const ambiance = sanitizeRating(fb.ratings?.ambiance);
 
   const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
-  const id = sanitizeString(fb.id, 50, `fb-${Date.now()}`);
+  const fallbackId = `fb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const id = sanitizeString(fb.id, 50, fallbackId);
   // Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection
   const rawTable = sanitizeString(fb.table, 10, "04");
   const table = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
