@@ -13,3 +13,8 @@
 **Vulnerability:** Persistence functions sanitizing input objects for storage/broadcast but returning undefined allowed caller handlers to populate local React state with raw, unsanitized input objects.
 **Learning:** In client-side state sync architectures, store persistence functions must return the sanitized object so local React state immediately reflects sanitized boundaries without awaiting storage events.
 **Prevention:** Always return the sanitized payload from store persistence functions and pass the returned result to React state updaters.
+
+## 2026-09-14 - Clamp Numerical Scores in Cross-Tab Sync
+**Vulnerability:** Untrusted cross-tab BroadcastChannel payloads or LocalStorage entries providing out-of-bounds `overallScore` values (e.g. `9999` or `-50` or `Infinity`) bypassed `!isNaN` checks and corrupted dashboard analytics and rating displays.
+**Learning:** Number validation in client-side state sync must enforce finite numbers and clamp values to valid domain bounds (`[1.0, 5.0]`).
+**Prevention:** Use `Number.isFinite(val)` and `Math.min(maxVal, Math.max(minVal, val))` on numeric fields from untrusted sources.

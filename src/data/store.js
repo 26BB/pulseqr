@@ -125,9 +125,11 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   const isAlert = Boolean(fb.isAlert);
   const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
 
-  const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
-    ? Number(fb.overallScore.toFixed(1))
-    : Number(((food + service + ambiance) / 3).toFixed(1));
+  // Security: Validate overallScore is finite and clamp to safe [1.0, 5.0] bounds to prevent untrusted payloads from corrupting analytics / UI
+  const computedOverall = Number(((food + service + ambiance) / 3).toFixed(1));
+  const overall = typeof fb.overallScore === "number" && Number.isFinite(fb.overallScore)
+    ? Math.min(5, Math.max(1, Number(fb.overallScore.toFixed(1))))
+    : computedOverall;
 
   let safeTags = fb.tags;
   if (!Array.isArray(fb.tags)) {
