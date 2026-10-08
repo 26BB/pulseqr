@@ -56,6 +56,22 @@ const sanitizeSettings = (obj) => {
   // Optimization: Reference identity fast-path skips string sanitization & regex replacements in O(1) time
   if (cachedSettings && cachedSettings === obj) return cachedSettings;
 
+  // Optimization: Pre-sanitization property check against cachedSettings avoids regex execution
+  // and string manipulation when incoming payload properties match cachedSettings values.
+  if (
+    cachedSettings &&
+    obj.cafeName === cachedSettings.cafeName &&
+    obj.branch === cachedSettings.branch &&
+    obj.address === cachedSettings.address &&
+    obj.ownerName === cachedSettings.ownerName &&
+    obj.ownerPhone === cachedSettings.ownerPhone &&
+    obj.discountCode === cachedSettings.discountCode &&
+    obj.alertThreshold === cachedSettings.alertThreshold &&
+    obj.tableCount === cachedSettings.tableCount
+  ) {
+    return cachedSettings;
+  }
+
   const cafeName = sanitizeString(obj.cafeName, 100, INITIAL_SETTINGS.cafeName);
   const branch = sanitizeString(obj.branch, 100, INITIAL_SETTINGS.branch);
   const address = sanitizeString(obj.address, 200, INITIAL_SETTINGS.address);
@@ -105,6 +121,38 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   // Optimization: If fb reference matches an existing already-sanitized cached item, return in O(1) time to bypass regex and allocation overhead
   if (existingItem && existingItem === fb) {
     return fb;
+  }
+
+  // Optimization: Pre-sanitization property check against existingItem avoids running ~10 sanitizeString regex calls
+  // and array slicing/cleaning per item when payload objects parsed from BroadcastChannel or storage events already match existing cached properties.
+  if (existingItem) {
+    const existingTags = existingItem.tags;
+    const inputTags = fb.tags;
+    const tagsMatch =
+      Array.isArray(existingTags) &&
+      Array.isArray(inputTags) &&
+      existingTags.length === inputTags.length &&
+      existingTags.every((t, idx) => t === inputTags[idx]);
+
+    if (
+      tagsMatch &&
+      fb.id === existingItem.id &&
+      fb.table === existingItem.table &&
+      fb.timestamp === existingItem.timestamp &&
+      fb.displayTime === existingItem.displayTime &&
+      fb.comment === existingItem.comment &&
+      fb.status === existingItem.status &&
+      fb.barista === existingItem.barista &&
+      fb.guestName === existingItem.guestName &&
+      fb.isAlert === existingItem.isAlert &&
+      fb.resolutionNote === existingItem.resolutionNote &&
+      fb.ratings &&
+      fb.ratings.food === existingItem.ratings?.food &&
+      fb.ratings.service === existingItem.ratings?.service &&
+      fb.ratings.ambiance === existingItem.ratings?.ambiance
+    ) {
+      return existingItem;
+    }
   }
 
   const food = sanitizeRating(fb.ratings?.food);

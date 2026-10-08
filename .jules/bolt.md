@@ -33,3 +33,7 @@
 ## 2026-10-10 - Persistent Module-Scoped Lookup Map Caching
 **Learning:** Constructing a new Map inside hot sanitization functions on every array processing pass creates transient object allocations and GC pressure during real-time BroadcastChannel or storage sync events, even when using direct `for` loops.
 **Action:** Maintain module-scoped Map instances alongside cached state and update them only when cached state changes so sanitization functions can re-use existing lookup Maps without per-invocation Map instantiations.
+
+## 2026-10-15 - Pre-Sanitization Short-Circuit Fast Path
+**Learning:** Executing multiple regex sanitizations (`sanitizeString`), string slicing, and array cleaning on incoming BroadcastChannel or LocalStorage sync payloads that already match cached items in memory causes unnecessary CPU overhead and temporary string allocations.
+**Action:** Add pre-sanitization primitive property fast-path checks against cached references (`cachedSettings`, `existingItem`) to bypass regex execution when input properties match existing cached state.
