@@ -35,7 +35,7 @@ try {
 // Helper to clamp numeric ratings to safe 1-5 integer bounds
 const sanitizeRating = (val) => {
   const num = Number(val);
-  if (isNaN(num)) return 3;
+  if (!Number.isFinite(num)) return 3;
   return Math.min(5, Math.max(1, Math.round(num)));
 };
 
@@ -125,8 +125,8 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   const isAlert = Boolean(fb.isAlert);
   const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
 
-  const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
-    ? Number(fb.overallScore.toFixed(1))
+  const overall = typeof fb.overallScore === "number" && Number.isFinite(fb.overallScore)
+    ? Number(Math.min(5, Math.max(1, fb.overallScore)).toFixed(1))
     : Number(((food + service + ambiance) / 3).toFixed(1));
 
   let safeTags = fb.tags;
