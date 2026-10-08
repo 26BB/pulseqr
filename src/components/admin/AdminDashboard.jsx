@@ -113,43 +113,52 @@ const AdminDashboard = memo(function AdminDashboard({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+        <div role="tablist" aria-label="Admin dashboard sections" className="flex items-center bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'live'}
             onClick={() => setActiveTab('live')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
               activeTab === 'live'
                 ? 'bg-[#4A90FF] text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Activity className="w-3.5 h-3.5" />
+            <Activity className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Live Operations</span>
             {pendingAlerts > 0 && (
-              <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+              <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" aria-hidden="true"></span>
             )}
           </button>
 
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'analytics'}
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
               activeTab === 'analytics'
                 ? 'bg-[#4A90FF] text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <BarChart3 className="w-3.5 h-3.5" />
+            <BarChart3 className="w-3.5 h-3.5" aria-hidden="true" />
             <span>AARRR Funnel</span>
           </button>
 
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'settings'}
             onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
               activeTab === 'settings'
                 ? 'bg-[#4A90FF] text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Settings className="w-3.5 h-3.5" />
+            <Settings className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Cafe Settings</span>
           </button>
         </div>
