@@ -64,7 +64,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
         <button
           onClick={onClose}
           aria-label="Close feedback details"
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
         >
           <X className="w-5 h-5" />
         </button>
@@ -167,7 +167,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 onClick={handleWhatsAppClick}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Damage Control WhatsApp</span>
@@ -175,7 +175,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
 
               <button
                 onClick={handleCompVoucher}
-                className="bg-[#1E60FF] hover:bg-blue-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer"
+                className="bg-[#1E60FF] hover:bg-blue-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
               >
                 <Gift className="w-3.5 h-3.5" />
                 <span>Issue ₹150 Comp Perk</span>
@@ -186,16 +186,18 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
             <div className="flex gap-2">
               {/* Security: Enforce input length limit (maxLength) to prevent LocalStorage DoS / bloat */}
               <input
+                id="resolution-note"
                 type="text"
                 maxLength={500}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
+                aria-label="Optional resolution note"
                 placeholder="Optional resolution note (e.g. Swapped coffee, apologized)"
-                className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
+                className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF] focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
               />
               <button
                 onClick={handleDirectResolve}
-                className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 cursor-pointer"
+                className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
               >
                 <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Mark Resolved</span>
