@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 
 const EMOJIS = [
@@ -81,6 +81,9 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
   const [comment, setComment] = useState('');
   const [copied, setCopied] = useState(false);
   const [lastSubmissionAlert, setLastSubmissionAlert] = useState(false);
+
+  // Optimization: Memoize selected tags set for O(1) membership checks on every tag chip render pass
+  const selectedTagsSet = useMemo(() => new Set(selectedTags), [selectedTags]);
 
   // Optimization: Memoize callbacks with empty dependency arrays to maintain stable references for EmojiRatingCategory and PresetTagChip
   const handleRating = useCallback((category, val) => {
@@ -275,7 +278,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                       <PresetTagChip
                         key={tag}
                         tag={tag}
-                        isSelected={selectedTags.includes(tag)}
+                        isSelected={selectedTagsSet.has(tag)}
                         onToggle={handleTagToggle}
                       />
                     ))}
