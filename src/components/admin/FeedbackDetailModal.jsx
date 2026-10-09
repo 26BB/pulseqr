@@ -1,5 +1,12 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Clock, User, Coffee } from 'lucide-react';
+
+// Security: Helper to sanitize values embedded in URLs/messages (strips newlines and control chars)
+const sanitizeMessageParam = (val, fallback = '') => {
+  if (val == null || val === '') return fallback;
+  // eslint-disable-next-line no-control-regex
+  return String(val).replace(/[\r\n\t\x00-\x1F\x7F]/g, ' ').trim() || fallback;
+};
 
 // Optimization: Memoize FeedbackDetailModal to prevent unnecessary re-renders when parent state updates while viewing modal details
 const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
@@ -13,23 +20,18 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // Optimization: Memoize WhatsApp recovery message string computation to prevent running regex sanitization
+  // and string template allocations on every character typed into the resolution note text input.
+  const defaultWhatsAppText = useMemo(() => {
+    const guestName = sanitizeMessageParam(feedback?.guestName, 'there');
+    const ownerName = sanitizeMessageParam(settings?.ownerName, 'Rohan');
+    const cafeName = sanitizeMessageParam(settings?.cafeName, 'Brew & Beans');
+    const table = sanitizeMessageParam(feedback?.table, '04');
+    return `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
+  }, [feedback?.guestName, feedback?.table, settings?.ownerName, settings?.cafeName]);
+
   if (!feedback) return null;
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
-
-  // Security: Helper to sanitize values embedded in URLs/messages (strips newlines and control chars)
-  const sanitizeMessageParam = (val, fallback = '') => {
-    if (val == null || val === '') return fallback;
-    // eslint-disable-next-line no-control-regex
-    return String(val).replace(/[\r\n\t\x00-\x1F\x7F]/g, ' ').trim() || fallback;
-  };
-
-  // Generate personalized WhatsApp recovery link
-  const guestName = sanitizeMessageParam(feedback.guestName, 'there');
-  const ownerName = sanitizeMessageParam(settings?.ownerName, 'Rohan');
-  const cafeName = sanitizeMessageParam(settings?.cafeName, 'Brew & Beans');
-  const table = sanitizeMessageParam(feedback.table, '04');
-
-  const defaultWhatsAppText = `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
 
   const handleWhatsAppClick = () => {
     // Security: Validate and sanitize phone digits to prevent open redirection or invalid wa.me protocol parameters

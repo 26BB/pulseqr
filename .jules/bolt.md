@@ -33,3 +33,7 @@
 ## 2026-10-10 - Persistent Module-Scoped Lookup Map Caching
 **Learning:** Constructing a new Map inside hot sanitization functions on every array processing pass creates transient object allocations and GC pressure during real-time BroadcastChannel or storage sync events, even when using direct `for` loops.
 **Action:** Maintain module-scoped Map instances alongside cached state and update them only when cached state changes so sanitization functions can re-use existing lookup Maps without per-invocation Map instantiations.
+
+## 2026-10-15 - Modal Text Input Keystroke Memoization
+**Learning:** Computing heavy sanitized strings or template literals (e.g. WhatsApp recovery links with regex replacements) inside modal components recalculates on every single character typed into local input fields (like resolution notes), creating unnecessary string allocations and main-thread work.
+**Action:** Always memoize derived string templates and sanitizations with `useMemo` based on entity props rather than local input state in modal dialogs.

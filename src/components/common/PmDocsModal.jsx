@@ -88,10 +88,13 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
   }
 ];
 
+// Optimization: Module-scoped lookup Map allows O(1) constant-time document retrieval instead of O(N) array search on every render
+const DOCS_MAP = new Map(DOCS_LIST.map((d) => [d.id, d]));
+
 // Optimization: Memoize PmDocsModal to prevent unnecessary re-renders when parent state updates while documentation modal is open
 const PmDocsModal = memo(function PmDocsModal({ onClose }) {
   const [activeDocId, setActiveDocId] = useState('prd');
-  const activeDoc = DOCS_LIST.find((d) => d.id === activeDocId) || DOCS_LIST[0];
+  const activeDoc = DOCS_MAP.get(activeDocId) || DOCS_LIST[0];
 
   useEffect(() => {
     const handleKeyDown = (e) => {
