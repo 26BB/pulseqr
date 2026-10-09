@@ -133,9 +133,18 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
   };
 
   const handleCopyCode = () => {
-    navigator.clipboard?.writeText(settings?.discountCode || 'PULSE10');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2200);
+    // Security: Check clipboard API availability and handle promise rejections to prevent unhandled rejection exceptions in restricted contexts
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard
+        .writeText(settings?.discountCode || 'PULSE10')
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2200);
+        })
+        .catch((err) => {
+          console.warn('Clipboard write prevented or failed:', err?.message || err);
+        });
+    }
   };
 
   const handleReset = () => {
