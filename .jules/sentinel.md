@@ -13,3 +13,8 @@
 **Vulnerability:** Persistence functions sanitizing input objects for storage/broadcast but returning undefined allowed caller handlers to populate local React state with raw, unsanitized input objects.
 **Learning:** In client-side state sync architectures, store persistence functions must return the sanitized object so local React state immediately reflects sanitized boundaries without awaiting storage events.
 **Prevention:** Always return the sanitized payload from store persistence functions and pass the returned result to React state updaters.
+
+## 2026-09-14 - Validate Number Finiteness and Numeric Bounds for Stored Scores
+**Vulnerability:** Checking `typeof val === "number" && !isNaN(val)` allowed non-finite values (`Infinity`) and out-of-bounds ratings from untrusted `localStorage` or `BroadcastChannel` events to bypass sanitization, corrupting average rating calculations.
+**Learning:** `!isNaN` evaluates to true for `Infinity` and numeric type checks alone do not enforce business domain bounds.
+**Prevention:** Always use `Number.isFinite(val)` and explicit boundary condition checks (`val >= MIN && val <= MAX`) when sanitizing numeric score inputs.
