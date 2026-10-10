@@ -125,7 +125,8 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   const isAlert = Boolean(fb.isAlert);
   const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
 
-  const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
+  // Security: Bounds check overallScore to prevent non-finite (Infinity/NaN) or out-of-bounds numbers from untrusted storage/broadcast payloads
+  const overall = typeof fb.overallScore === "number" && Number.isFinite(fb.overallScore) && fb.overallScore >= 1 && fb.overallScore <= 5
     ? Number(fb.overallScore.toFixed(1))
     : Number(((food + service + ambiance) / 3).toFixed(1));
 
