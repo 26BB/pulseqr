@@ -131,7 +131,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
           <button
             onClick={onClose}
             aria-label="Close documentation hub"
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 cursor-pointer"
+            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -141,16 +141,18 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 flex-1 overflow-hidden">
           
           {/* Left Navigation List (4 cols) */}
-          <div className="md:col-span-4 space-y-2 overflow-y-auto pr-1">
+          <div role="tablist" aria-label="Documentation sections" className="md:col-span-4 space-y-2 overflow-y-auto pr-1">
             {DOCS_LIST.map((doc) => {
               const Icon = doc.icon;
               const isSelected = doc.id === activeDocId;
               return (
                 <button
                   key={doc.id}
+                  role="tab"
                   aria-selected={isSelected}
+                  aria-label={`View document: ${doc.title}`}
                   onClick={() => setActiveDocId(doc.id)}
-                  className={`w-full text-left p-3 rounded-2xl border transition-all cursor-pointer ${
+                  className={`w-full text-left p-3 rounded-2xl border transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A] ${
                     isSelected
                       ? 'bg-[#FFF4EE] border-[#FF6B4A] shadow-xs'
                       : 'bg-slate-50 hover:bg-slate-100 border-slate-200'
@@ -201,7 +203,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
           <span>All documents also available in the repository root (<code className="bg-slate-100 px-1 py-0.5 rounded">/docs</code>)</span>
           <button
             onClick={onClose}
-            className="bg-[#FF6B4A] hover:bg-[#FF5530] text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer shadow"
+            className="bg-[#FF6B4A] hover:bg-[#FF5530] text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A]"
           >
             Back to Interactive App
           </button>
