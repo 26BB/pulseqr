@@ -113,7 +113,9 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
 
   const safeStatus = VALID_STATUSES.includes(fb.status) ? fb.status : "ACKNOWLEDGED";
   const fallbackId = `fb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  const id = sanitizeString(fb.id, 50, fallbackId);
+  const rawId = sanitizeString(fb.id, 50, fallbackId);
+  // Security: Sanitize feedback ID to alphanumeric, hyphens, and underscores to prevent injection or malformed keys
+  const id = rawId.replace(/[^a-zA-Z0-9_-]/g, "") || fallbackId;
   // Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection
   const rawTable = sanitizeString(fb.table, 10, "04");
   const table = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
@@ -379,8 +381,9 @@ export const addFeedback = (feedbackData) => {
 
 export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const current = getStoredFeedbacks();
-  // Security: Validate id input type and sanitize note / status parameters against injection and state corruption
-  const safeId = typeof id === "string" ? id : String(id || "");
+  // Security: Validate id input type and sanitize parameter to alphanumeric, hyphens, and underscores
+  const rawId = typeof id === "string" ? id : String(id || "");
+  const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, "");
   if (!safeId) return current;
 
   const safeNote = sanitizeString(note, 500, "");
