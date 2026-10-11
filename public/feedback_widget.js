@@ -25,7 +25,18 @@
   console.error = function (...args) {
     capturedErrors.push({
       type: 'console_error',
-      message: args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '),
+      message: args
+        .map(a => {
+          if (typeof a === 'object' && a !== null) {
+            try {
+              return JSON.stringify(a);
+            } catch {
+              return String(a);
+            }
+          }
+          return String(a);
+        })
+        .join(' '),
       time: new Date().toISOString()
     });
     if (capturedErrors.length > MAX_ERRORS) capturedErrors.shift();
@@ -225,8 +236,8 @@
             <button class="feedback-tab-btn" data-type="General">💬 General</button>
           </div>
 
-          <textarea class="feedback-textarea" id="fbMessage" placeholder="Describe the issue or feature request in detail..."></textarea>
-          <input type="email" class="feedback-input-email" id="fbEmail" placeholder="Your email (optional, for update notifications)" />
+          <textarea class="feedback-textarea" id="fbMessage" maxlength="1000" placeholder="Describe the issue or feature request in detail..."></textarea>
+          <input type="email" class="feedback-input-email" id="fbEmail" maxlength="100" placeholder="Your email (optional, for update notifications)" />
 
           <div class="feedback-metadata-badge">
             <span id="fbMetaInfo">Auto-attaching: URL, Device</span>
@@ -301,11 +312,21 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
+    // Security: Validate webhook URL scheme to enforce HTTPS protocol transmission
+    const configUrl = window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.webhookUrl;
+    if (typeof configUrl !== 'string' || !configUrl.startsWith('https://')) {
+      console.warn('Feedback webhook URL must use HTTPS');
+      alert('Unable to submit feedback: Invalid or insecure webhook configuration.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send to Team";
+      return;
+    }
+
     const payload = {
       projectName: (window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.projectName) || document.title || "Web App",
       type: selectedType,
-      message: text,
-      email: emailInput.value.trim() || "Anonymous",
+      message: text.slice(0, 1000),
+      email: emailInput.value.trim().slice(0, 100) || "Anonymous",
       url: window.location.href,
       viewport: `${window.innerWidth}x${window.innerHeight}`,
       userAgent: navigator.userAgent,
@@ -314,7 +335,7 @@
 
     try {
       // Use text/plain or no-cors for seamless Google Apps Script webhook calls
-      await fetch(window.FEEDBACK_CONFIG.webhookUrl, {
+      await fetch(configUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
