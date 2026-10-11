@@ -32,6 +32,12 @@ try {
   console.warn("BroadcastChannel not supported in this browser environment", e);
 }
 
+// Optimization: Module-scoped regex compilation avoids RegExp re-allocation on every string sanitization pass
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHAR_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+const NON_PHONE_CHARS_REGEX = /[^\d+\s()-]/g;
+const NON_ALPHANUMERIC_DASH_REGEX = /[^a-zA-Z0-9_-]/g;
+
 // Helper to clamp numeric ratings to safe 1-5 integer bounds
 const sanitizeRating = (val) => {
   const num = Number(val);
@@ -40,11 +46,15 @@ const sanitizeRating = (val) => {
 };
 
 // Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat and control character injection
+// Optimization: Module-scoped regex with fast-path .test() avoids running .replace() on clean strings (called ~1800x per sync pass)
 const sanitizeString = (str, maxLen = 100, fallback = "") => {
   if (typeof str !== "string") return fallback;
+  const trimmed = str.trim();
+  if (!trimmed) return fallback;
   // Security: Strip non-printable ASCII control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F, \x7F)
-  // eslint-disable-next-line no-control-regex
-  const clean = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
+  const clean = CONTROL_CHAR_REGEX.test(trimmed)
+    ? trimmed.replace(CONTROL_CHAR_REGEX, "")
+    : trimmed;
   return clean ? clean.slice(0, maxLen) : fallback;
 };
 
@@ -62,10 +72,10 @@ const sanitizeSettings = (obj) => {
   const ownerName = sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName);
   // Security: Whitelist valid phone number characters (digits, +, spaces, hyphens, parens) to prevent protocol injection or malformed input
   const rawOwnerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
-  const ownerPhone = rawOwnerPhone.replace(/[^\d+\s()-]/g, '') || INITIAL_SETTINGS.ownerPhone;
+  const ownerPhone = rawOwnerPhone.replace(NON_PHONE_CHARS_REGEX, '') || INITIAL_SETTINGS.ownerPhone;
   // Security: Sanitize discountCode to alphanumeric, hyphens, and underscores to prevent injection / malformed codes from cross-tab sync or LocalStorage
   const rawDiscountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
-  const discountCode = rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode;
+  const discountCode = rawDiscountCode.replace(NON_ALPHANUMERIC_DASH_REGEX, '') || INITIAL_SETTINGS.discountCode;
   const alertThreshold = Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2)));
   const tableCount = Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15)));
 
@@ -116,7 +126,7 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   const id = sanitizeString(fb.id, 50, fallbackId);
   // Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection
   const rawTable = sanitizeString(fb.table, 10, "04");
-  const table = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
+  const table = rawTable.replace(NON_ALPHANUMERIC_DASH_REGEX, "") || "04";
   const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
   const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
   const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
@@ -354,7 +364,7 @@ export const addFeedback = (feedbackData) => {
     : Math.random().toString(36).slice(2, 7);
 
   const rawTable = sanitizeString(feedbackData?.table, 10, "04");
-  const safeTable = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
+  const safeTable = rawTable.replace(NON_ALPHANUMERIC_DASH_REGEX, "") || "04";
 
   const newEntry = {
     id: `fb-${Date.now()}-${idSuffix}`,

@@ -15,9 +15,11 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
 
     for (let i = 0; i < total; i++) {
       const f = feedbacks[i];
-      foodSum += f.ratings.food;
-      serviceSum += f.ratings.service;
-      ambianceSum += f.ratings.ambiance;
+      if (f.ratings) {
+        foodSum += f.ratings.food || 0;
+        serviceSum += f.ratings.service || 0;
+        ambianceSum += f.ratings.ambiance || 0;
+      }
     }
 
     return {
@@ -136,7 +138,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
           <div className="space-y-2.5">
             {BARISTAS.map((b, i) => (
               <div
-                key={i}
+                key={b.name}
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
               >
                 <div className="flex items-center gap-2.5">
@@ -176,11 +178,11 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {POPULAR_TAGS.map((t, i) => {
+          {POPULAR_TAGS.map((t) => {
             const isPos = t.type === 'positive';
             return (
               <span
-                key={i}
+                key={t.name}
                 className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
                   isPos
                     ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
