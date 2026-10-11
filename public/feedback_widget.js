@@ -23,9 +23,24 @@
 
   const originalConsoleError = console.error;
   console.error = function (...args) {
+    let msg = '';
+    try {
+      msg = args.map(a => {
+        if (typeof a === 'object' && a !== null) {
+          try {
+            return JSON.stringify(a);
+          } catch {
+            return '[Unserializable Object]';
+          }
+        }
+        return String(a);
+      }).join(' ');
+    } catch {
+      msg = 'Error formatting console log';
+    }
     capturedErrors.push({
       type: 'console_error',
-      message: args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '),
+      message: msg.slice(0, 500),
       time: new Date().toISOString()
     });
     if (capturedErrors.length > MAX_ERRORS) capturedErrors.shift();
@@ -225,8 +240,8 @@
             <button class="feedback-tab-btn" data-type="General">💬 General</button>
           </div>
 
-          <textarea class="feedback-textarea" id="fbMessage" placeholder="Describe the issue or feature request in detail..."></textarea>
-          <input type="email" class="feedback-input-email" id="fbEmail" placeholder="Your email (optional, for update notifications)" />
+          <textarea class="feedback-textarea" id="fbMessage" maxlength="1000" placeholder="Describe the issue or feature request in detail..."></textarea>
+          <input type="email" class="feedback-input-email" id="fbEmail" maxlength="100" placeholder="Your email (optional, for update notifications)" />
 
           <div class="feedback-metadata-badge">
             <span id="fbMetaInfo">Auto-attaching: URL, Device</span>
@@ -292,7 +307,7 @@
 
   // Submit Feedback
   submitBtn.addEventListener('click', async () => {
-    const text = messageInput.value.trim();
+    const text = messageInput.value.trim().slice(0, 1000);
     if (!text) {
       alert("Please write a short description.");
       return;
@@ -301,24 +316,30 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
+    const rawEmail = emailInput.value.trim().slice(0, 100);
     const payload = {
-      projectName: (window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.projectName) || document.title || "Web App",
+      projectName: String((window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.projectName) || document.title || "Web App").slice(0, 100),
       type: selectedType,
       message: text,
-      email: emailInput.value.trim() || "Anonymous",
-      url: window.location.href,
+      email: rawEmail || "Anonymous",
+      url: window.location.href.slice(0, 500),
       viewport: `${window.innerWidth}x${window.innerHeight}`,
-      userAgent: navigator.userAgent,
+      userAgent: navigator.userAgent.slice(0, 200),
       consoleErrors: capturedErrors
     };
 
     try {
-      // Use text/plain or no-cors for seamless Google Apps Script webhook calls
-      await fetch(window.FEEDBACK_CONFIG.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
+      const targetUrl = window.FEEDBACK_CONFIG?.webhookUrl;
+      // Security: Validate webhook URL protocol scheme to ensure requests are only dispatched over HTTP/HTTPS
+      if (typeof targetUrl === 'string' && /^https?:\/\//i.test(targetUrl)) {
+        await fetch(targetUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        console.warn("Invalid feedback webhook URL configured:", targetUrl);
+      }
     } catch (err) {
       console.warn("Feedback network request sent (no-cors mode):", err);
     }
