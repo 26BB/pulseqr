@@ -266,10 +266,12 @@ const AdminDashboard = memo(function AdminDashboard({
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-bold">
+                <div role="group" aria-label="Filter feedback stream" className="flex items-center gap-1.5 text-xs font-bold">
                   <button
+                    type="button"
+                    aria-pressed={filter === 'all'}
                     onClick={() => setFilter('all')}
-                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
                       filter === 'all'
                         ? 'bg-[#4A90FF] text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -279,8 +281,10 @@ const AdminDashboard = memo(function AdminDashboard({
                   </button>
 
                   <button
+                    type="button"
+                    aria-pressed={filter === 'alert'}
                     onClick={() => setFilter('alert')}
-                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
                       filter === 'alert'
                         ? 'bg-rose-600 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -290,8 +294,10 @@ const AdminDashboard = memo(function AdminDashboard({
                   </button>
 
                   <button
+                    type="button"
+                    aria-pressed={filter === '5star'}
                     onClick={() => setFilter('5star')}
-                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A90FF] ${
                       filter === '5star'
                         ? 'bg-emerald-600 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -373,8 +379,9 @@ const AdminDashboard = memo(function AdminDashboard({
                   Generate high-res A6 acrylic standees with scannable QR codes for Tables 01–{settings?.tableCount || 15}.
                 </p>
                 <button
+                  type="button"
                   onClick={onOpenStandees}
-                  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-3 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+                  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-3 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
                 >
                   <QrCode className="w-4 h-4 text-[#FFD700]" />
                   <span>Open Standee Generator</span>
