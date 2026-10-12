@@ -41,10 +41,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
           {/* Security: Enforce frontend input length limits (maxLength) to prevent LocalStorage DoS / bloat */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-cafe-name" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Cafe Brand Name
               </label>
               <input
+                id="settings-cafe-name"
                 type="text"
                 maxLength={100}
                 value={formData.cafeName}
@@ -54,10 +55,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-branch" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Branch / Area in Pune
               </label>
               <input
+                id="settings-branch"
                 type="text"
                 maxLength={100}
                 value={formData.branch}
@@ -67,10 +69,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-address" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Full Address
               </label>
               <input
+                id="settings-address"
                 type="text"
                 maxLength={200}
                 value={formData.address}
@@ -80,10 +83,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-owner-name" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Founder / Floor Manager Name
               </label>
               <input
+                id="settings-owner-name"
                 type="text"
                 maxLength={100}
                 value={formData.ownerName}
@@ -93,10 +97,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-table-count" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Active Table Standees Count
               </label>
               <input
+                id="settings-table-count"
                 type="number"
                 min="1"
                 max="50"
@@ -125,10 +130,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="settings-owner-phone" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Manager WhatsApp Alert Number
                 </label>
                 <input
+                  id="settings-owner-phone"
                   type="text"
                   maxLength={30}
                   value={formData.ownerPhone}
@@ -138,10 +144,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="settings-alert-threshold" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Alert Trigger Threshold (Stars)
                 </label>
                 <select
+                  id="settings-alert-threshold"
                   value={formData.alertThreshold}
                   onChange={(e) => handleChange('alertThreshold', Number(e.target.value))}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
@@ -182,10 +189,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-discount-code" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Discount Voucher Code
               </label>
               <input
+                id="settings-discount-code"
                 type="text"
                 maxLength={20}
                 value={formData.discountCode}
@@ -195,10 +203,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="settings-perk-desc" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Perk Description
               </label>
               <input
+                id="settings-perk-desc"
                 type="text"
                 value="10% Off on next coffee / bill"
                 disabled
