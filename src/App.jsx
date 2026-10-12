@@ -112,6 +112,7 @@ export default function App() {
   const handleSaveSettings = useCallback((newSettings) => {
     const sanitized = saveSettings(newSettings);
     setSettings(sanitized);
+    return sanitized;
   }, []);
 
   const handleResetData = useCallback(() => {
