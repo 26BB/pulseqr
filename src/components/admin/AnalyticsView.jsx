@@ -4,10 +4,20 @@ import { Star } from 'lucide-react';
 
 // Optimization: Wrap AnalyticsView in React.memo to prevent re-renders when parent state changes (e.g. modal toggle, filter selection) while feedbacks remains unchanged
 const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
-  // Optimization: Single-pass O(N) calculation memoized with useMemo instead of running 3 separate .reduce() passes
-  const { avgFood, avgService, avgAmbiance } = useMemo(() => {
+  // Optimization: Single-pass O(N) calculation memoized with useMemo pre-computes category averages and style percentage strings
+  // to avoid implicit string-to-number coercions, floating-point arithmetic, and template formatting on every render pass.
+  const { avgFood, avgService, avgAmbiance, foodPct, servicePct, ambiancePct } = useMemo(() => {
     const total = feedbacks.length;
-    if (!total) return { avgFood: '4.4', avgService: '4.6', avgAmbiance: '3.8' };
+    if (!total) {
+      return {
+        avgFood: '4.4',
+        avgService: '4.6',
+        avgAmbiance: '3.8',
+        foodPct: '88%',
+        servicePct: '92%',
+        ambiancePct: '76%',
+      };
+    }
 
     let foodSum = 0;
     let serviceSum = 0;
@@ -22,10 +32,17 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
       }
     }
 
+    const foodAvg = foodSum / total;
+    const serviceAvg = serviceSum / total;
+    const ambianceAvg = ambianceSum / total;
+
     return {
-      avgFood: (foodSum / total).toFixed(1),
-      avgService: (serviceSum / total).toFixed(1),
-      avgAmbiance: (ambianceSum / total).toFixed(1),
+      avgFood: foodAvg.toFixed(1),
+      avgService: serviceAvg.toFixed(1),
+      avgAmbiance: ambianceAvg.toFixed(1),
+      foodPct: `${Math.min(100, Math.max(0, Math.round((foodAvg / 5) * 100)))}%`,
+      servicePct: `${Math.min(100, Math.max(0, Math.round((serviceAvg / 5) * 100)))}%`,
+      ambiancePct: `${Math.min(100, Math.max(0, Math.round((ambianceAvg / 5) * 100)))}%`,
     };
   }, [feedbacks]);
 
@@ -96,7 +113,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-[#1E60FF] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(avgFood / 5) * 100}%` }}
+                  style={{ width: foodPct }}
                 ></div>
               </div>
             </div>
@@ -109,7 +126,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(avgService / 5) * 100}%` }}
+                  style={{ width: servicePct }}
                 ></div>
               </div>
             </div>
@@ -122,7 +139,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-amber-400 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(avgAmbiance / 5) * 100}%` }}
+                  style={{ width: ambiancePct }}
                 ></div>
               </div>
             </div>
@@ -138,7 +155,7 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
           <div className="space-y-2.5">
             {BARISTAS.map((b, i) => (
               <div
-                key={i}
+                key={b.name}
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
               >
                 <div className="flex items-center gap-2.5">
@@ -178,11 +195,11 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {POPULAR_TAGS.map((t, i) => {
+          {POPULAR_TAGS.map((t) => {
             const isPos = t.type === 'positive';
             return (
               <span
-                key={i}
+                key={t.name}
                 className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
                   isPos
                     ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
