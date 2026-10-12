@@ -39,13 +39,27 @@ const sanitizeRating = (val) => {
   return Math.min(5, Math.max(1, Math.round(num)));
 };
 
+// Pre-compiled regexes for zero-allocation fast-path validation
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHAR_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHAR_GLOBAL_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+const PHONE_CHARS_REGEX = /^[\d+\s()-]+$/;
+const ALPHANUM_HYPHEN_REGEX = /^[a-zA-Z0-9_-]+$/;
+
 // Helper to sanitize & truncate string inputs to prevent LocalStorage DoS / bloat and control character injection
+// Optimization: Pre-checks for control characters and whitespace to return original string references in O(1) time
+// when strings are already valid, avoiding transient string allocations (replace, trim, slice) in hot sanitization loops.
 const sanitizeString = (str, maxLen = 100, fallback = "") => {
   if (typeof str !== "string") return fallback;
-  // Security: Strip non-printable ASCII control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F, \x7F)
-  // eslint-disable-next-line no-control-regex
-  const clean = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
-  return clean ? clean.slice(0, maxLen) : fallback;
+  const hasControl = CONTROL_CHAR_REGEX.test(str);
+  const clean = hasControl ? str.replace(CONTROL_CHAR_GLOBAL_REGEX, "") : str;
+  const trimmed = clean.trim();
+  if (!trimmed) return fallback;
+  if (trimmed === str && str.length <= maxLen) {
+    return str;
+  }
+  return trimmed.length > maxLen ? trimmed.slice(0, maxLen) : trimmed;
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
@@ -62,10 +76,14 @@ const sanitizeSettings = (obj) => {
   const ownerName = sanitizeString(obj.ownerName, 100, INITIAL_SETTINGS.ownerName);
   // Security: Whitelist valid phone number characters (digits, +, spaces, hyphens, parens) to prevent protocol injection or malformed input
   const rawOwnerPhone = sanitizeString(obj.ownerPhone, 30, INITIAL_SETTINGS.ownerPhone);
-  const ownerPhone = rawOwnerPhone.replace(/[^\d+\s()-]/g, '') || INITIAL_SETTINGS.ownerPhone;
+  const ownerPhone = PHONE_CHARS_REGEX.test(rawOwnerPhone)
+    ? rawOwnerPhone
+    : (rawOwnerPhone.replace(/[^\d+\s()-]/g, '') || INITIAL_SETTINGS.ownerPhone);
   // Security: Sanitize discountCode to alphanumeric, hyphens, and underscores to prevent injection / malformed codes from cross-tab sync or LocalStorage
   const rawDiscountCode = sanitizeString(obj.discountCode, 20, INITIAL_SETTINGS.discountCode);
-  const discountCode = rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode;
+  const discountCode = ALPHANUM_HYPHEN_REGEX.test(rawDiscountCode)
+    ? rawDiscountCode
+    : (rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode);
   const alertThreshold = Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2)));
   const tableCount = Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15)));
 
@@ -148,10 +166,17 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
 
   // Optimization: If an existing cached item matches all sanitized properties, return existingItem to preserve object identity across BroadcastChannel / localStorage JSON.parse events
   if (existingItem) {
-    const tagsMatch =
+    let tagsMatch =
       Array.isArray(existingItem.tags) &&
-      existingItem.tags.length === safeTags.length &&
-      existingItem.tags.every((t, idx) => t === safeTags[idx]);
+      existingItem.tags.length === safeTags.length;
+    if (tagsMatch) {
+      for (let j = 0; j < safeTags.length; j++) {
+        if (existingItem.tags[j] !== safeTags[j]) {
+          tagsMatch = false;
+          break;
+        }
+      }
+    }
 
     const isExistingUnchanged =
       existingItem.id === id &&
@@ -244,12 +269,15 @@ const sanitizeFeedbackArray = (arr) => {
   }
 
   // Optimization: If result matches cachedFeedbacks element-by-element, reuse cachedFeedbacks array reference
-  if (
-    cachedFeedbacks &&
-    cachedFeedbacks.length === result.length &&
-    cachedFeedbacks.every((item, idx) => item === result[idx])
-  ) {
-    return cachedFeedbacks;
+  if (cachedFeedbacks && cachedFeedbacks.length === result.length) {
+    let allMatch = true;
+    for (let i = 0; i < result.length; i++) {
+      if (cachedFeedbacks[i] !== result[i]) {
+        allMatch = false;
+        break;
+      }
+    }
+    if (allMatch) return cachedFeedbacks;
   }
 
   // Optimization: If result matches input arr element-by-element, reuse input arr reference
@@ -387,20 +415,24 @@ export const updateFeedbackStatus = (id, newStatus, note = "") => {
   const safeStatus = VALID_STATUSES.includes(newStatus) ? newStatus : "ACKNOWLEDGED";
 
   let changed = false;
-  const updated = current.map((fb) => {
+  const len = current.length;
+  const updated = new Array(len);
+  for (let i = 0; i < len; i++) {
+    const fb = current[i];
     if (fb.id === safeId) {
       const targetNote = safeNote || fb.resolutionNote;
       if (fb.status !== safeStatus || fb.resolutionNote !== targetNote) {
         changed = true;
-        return {
+        updated[i] = {
           ...fb,
           status: safeStatus,
           ...(targetNote !== undefined ? { resolutionNote: targetNote } : {}),
         };
+        continue;
       }
     }
-    return fb;
-  });
+    updated[i] = fb;
+  }
 
   if (!changed) {
     return current;

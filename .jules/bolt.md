@@ -33,3 +33,7 @@
 ## 2026-10-10 - Persistent Module-Scoped Lookup Map Caching
 **Learning:** Constructing a new Map inside hot sanitization functions on every array processing pass creates transient object allocations and GC pressure during real-time BroadcastChannel or storage sync events, even when using direct `for` loops.
 **Action:** Maintain module-scoped Map instances alongside cached state and update them only when cached state changes so sanitization functions can re-use existing lookup Maps without per-invocation Map instantiations.
+
+## 2026-10-15 - Fast-Path Zero-Allocation String Sanitization
+**Learning:** Unconditionally calling `.replace()`, `.trim()`, and `.slice()` on strings during storage/broadcast sanitization allocates transient string instances on every field, even when the input string is already valid and clean.
+**Action:** Use pre-compiled regex `.test()` fast-paths to verify strings before invoking mutation methods. Return original string references directly when strings require no cleaning to preserve object/string identity and eliminate GC churn.
