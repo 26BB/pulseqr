@@ -23,9 +23,27 @@
 
   const originalConsoleError = console.error;
   console.error = function (...args) {
+    let message = '';
+    try {
+      message = args
+        .map(a => {
+          if (typeof a === 'object' && a !== null) {
+            try {
+              return JSON.stringify(a);
+            } catch {
+              return String(a.message || a);
+            }
+          }
+          return String(a);
+        })
+        .join(' ')
+        .slice(0, 500);
+    } catch {
+      message = 'Console error captured';
+    }
     capturedErrors.push({
       type: 'console_error',
-      message: args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '),
+      message,
       time: new Date().toISOString()
     });
     if (capturedErrors.length > MAX_ERRORS) capturedErrors.shift();
@@ -225,8 +243,8 @@
             <button class="feedback-tab-btn" data-type="General">💬 General</button>
           </div>
 
-          <textarea class="feedback-textarea" id="fbMessage" placeholder="Describe the issue or feature request in detail..."></textarea>
-          <input type="email" class="feedback-input-email" id="fbEmail" placeholder="Your email (optional, for update notifications)" />
+          <textarea class="feedback-textarea" id="fbMessage" maxlength="1000" placeholder="Describe the issue or feature request in detail..."></textarea>
+          <input type="email" class="feedback-input-email" id="fbEmail" maxlength="100" placeholder="Your email (optional, for update notifications)" />
 
           <div class="feedback-metadata-badge">
             <span id="fbMetaInfo">Auto-attaching: URL, Device</span>
@@ -292,7 +310,7 @@
 
   // Submit Feedback
   submitBtn.addEventListener('click', async () => {
-    const text = messageInput.value.trim();
+    const text = messageInput.value.trim().slice(0, 1000);
     if (!text) {
       alert("Please write a short description.");
       return;
@@ -305,7 +323,7 @@
       projectName: (window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.projectName) || document.title || "Web App",
       type: selectedType,
       message: text,
-      email: emailInput.value.trim() || "Anonymous",
+      email: emailInput.value.trim().slice(0, 100) || "Anonymous",
       url: window.location.href,
       viewport: `${window.innerWidth}x${window.innerHeight}`,
       userAgent: navigator.userAgent,

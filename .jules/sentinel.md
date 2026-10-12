@@ -13,3 +13,8 @@
 **Vulnerability:** Persistence functions sanitizing input objects for storage/broadcast but returning undefined allowed caller handlers to populate local React state with raw, unsanitized input objects.
 **Learning:** In client-side state sync architectures, store persistence functions must return the sanitized object so local React state immediately reflects sanitized boundaries without awaiting storage events.
 **Prevention:** Always return the sanitized payload from store persistence functions and pass the returned result to React state updaters.
+
+## 2026-09-14 - Wrap Console Overrides in Safe Stringification
+**Vulnerability:** Monkeypatching `console.error` with raw `JSON.stringify` on arguments throws uncaught `TypeError` when circular structures or DOM/React nodes are logged, crashing application error handlers.
+**Learning:** Global error collection hooks must wrap stringification in `try/catch` and enforce strict output truncation to avoid breaking fail-secure error handling.
+**Prevention:** Always safely catch JSON stringification errors when capturing console or exception logs and cap string lengths.
