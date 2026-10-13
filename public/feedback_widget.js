@@ -320,6 +320,12 @@
 
     const email = emailInput.value.trim().slice(0, 100);
 
+    // Security: Input validation - Ensure provided optional email matches standard email format
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert("Please enter a valid email address or leave it blank.");
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
