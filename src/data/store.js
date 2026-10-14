@@ -59,7 +59,16 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
   if (trimmed === str && str.length <= maxLen) {
     return str;
   }
-  return trimmed.length > maxLen ? trimmed.slice(0, maxLen) : trimmed;
+  if (trimmed.length > maxLen) {
+    let sliced = trimmed.slice(0, maxLen);
+    const lastCode = sliced.charCodeAt(sliced.length - 1);
+    // Security: Avoid trailing unpaired high surrogate if maxLen cuts a UTF-16 surrogate pair
+    if (lastCode >= 0xD800 && lastCode <= 0xDBFF) {
+      sliced = sliced.slice(0, -1);
+    }
+    return sliced;
+  }
+  return trimmed;
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
