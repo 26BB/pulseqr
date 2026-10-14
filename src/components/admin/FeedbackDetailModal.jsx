@@ -16,22 +16,23 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   if (!feedback) return null;
   const isAlert = feedback.isAlert && feedback.status !== 'RESOLVED';
 
-  // Security: Helper to sanitize values embedded in URLs/messages (strips newlines and control chars)
-  const sanitizeMessageParam = (val, fallback = '') => {
-    if (val == null || val === '') return fallback;
-    // eslint-disable-next-line no-control-regex
-    return String(val).replace(/[\r\n\t\x00-\x1F\x7F]/g, ' ').trim() || fallback;
-  };
-
-  // Generate personalized WhatsApp recovery link
-  const guestName = sanitizeMessageParam(feedback.guestName, 'there');
-  const ownerName = sanitizeMessageParam(settings?.ownerName, 'Rohan');
-  const cafeName = sanitizeMessageParam(settings?.cafeName, 'Brew & Beans');
-  const table = sanitizeMessageParam(feedback.table, '04');
-
-  const defaultWhatsAppText = `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
-
+  // Optimization: Defer WhatsApp recovery message string sanitization and template formatting to click execution time
+  // so typing resolution notes doesn't run redundant regex parameter sanitization passes on every keystroke.
   const handleWhatsAppClick = () => {
+    // Security: Helper to sanitize values embedded in URLs/messages (strips newlines and control chars)
+    const sanitizeMessageParam = (val, fallback = '') => {
+      if (val == null || val === '') return fallback;
+      // eslint-disable-next-line no-control-regex
+      return String(val).replace(/[\r\n\t\x00-\x1F\x7F]/g, ' ').trim() || fallback;
+    };
+
+    const guestName = sanitizeMessageParam(feedback.guestName, 'there');
+    const ownerName = sanitizeMessageParam(settings?.ownerName, 'Rohan');
+    const cafeName = sanitizeMessageParam(settings?.cafeName, 'Brew & Beans');
+    const table = sanitizeMessageParam(feedback.table, '04');
+
+    const defaultWhatsAppText = `Hi ${guestName}! This is ${ownerName} from ${cafeName}. I noticed your feedback on Table ${table}. We sincerely apologize that your experience wasn't up to standard today. We'd love to comp your bill and have a fresh treat brought to your table right away!`;
+
     // Security: Validate and sanitize phone digits to prevent open redirection or invalid wa.me protocol parameters
     let phoneDigits = (settings?.ownerPhone || '+919823012345').replace(/\D/g, '').slice(0, 15);
     if (!phoneDigits || phoneDigits.length < 7) return;
