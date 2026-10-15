@@ -180,7 +180,12 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   // Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection
   const rawTable = sanitizeString(fb.table, 10, "04");
   const table = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
-  const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
+  // Security: Validate timestamp is a valid, parseable ISO date string to prevent malformed date payload injection
+  const rawTimestamp = sanitizeString(fb.timestamp, 50, "");
+  const timestamp =
+    rawTimestamp && !isNaN(Date.parse(rawTimestamp))
+      ? rawTimestamp
+      : new Date().toISOString();
   const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
   const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
   const barista = sanitizeString(fb.barista, 50, "Pranav") || "Pranav";
