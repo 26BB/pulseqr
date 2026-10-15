@@ -5,7 +5,13 @@ import { Save, MessageSquare, ShieldAlert, Coffee, RotateCcw, Check } from 'luci
 const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onResetData }) {
   // Optimization: Lazy state initializer prevents shallow-copy object allocation on every re-render
   const [formData, setFormData] = useState(() => ({ ...settings }));
+  const [prevSettings, setPrevSettings] = useState(settings);
   const [saved, setSaved] = useState(false);
+
+  if (settings !== prevSettings) {
+    setPrevSettings(settings);
+    setFormData({ ...settings });
+  }
 
   const handleChange = (field, val) => {
     setFormData((prev) => ({ ...prev, [field]: val }));
@@ -13,14 +19,22 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
 
   const handleSave = (e) => {
     e.preventDefault();
-    onSaveSettings(formData);
+    const sanitized = onSaveSettings(formData);
+    if (sanitized) {
+      setFormData({ ...sanitized });
+      setPrevSettings(sanitized);
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   const handleTestAlert = () => {
+    // Security: Sanitize control characters from phone display string in alert dialog
+    const rawPhone = String(formData.ownerPhone || '+91 98230 12345');
+    // eslint-disable-next-line no-control-regex
+    const targetPhone = rawPhone.replace(/[\r\n\t\x00-\x1F\x7F]/g, '').trim();
     alert(
-      `🚨 TEST WHATSAPP DISPATCHED to ${formData.ownerPhone || '+91 98230 12345'}:\n\n` +
+      `🚨 TEST WHATSAPP DISPATCHED to ${targetPhone || '+91 98230 12345'}:\n\n` +
       `"PulseQR Alert: Table 12 submitted 1.5★ rating. Customer reported 'Cold food and slow order'. Intercept immediately before Zomato review!"`
     );
   };
