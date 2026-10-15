@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Printer, Download, ShieldCheck } from 'lucide-react';
+import { X, Printer, Download, ShieldCheck, Check } from 'lucide-react';
 
 // Optimization: Static QR code logo overlay settings hoisted outside component to maintain stable reference identity across renders
 const QR_IMAGE_SETTINGS = {
@@ -15,6 +15,7 @@ const QR_IMAGE_SETTINGS = {
 // Optimization: Memoize QrStandeeGenerator to prevent unnecessary re-renders when parent state updates while standee modal is open
 const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
+  const [downloaded, setDownloaded] = useState(false);
   const totalTables = settings?.tableCount || 15;
 
   useEffect(() => {
@@ -39,6 +40,11 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadSvg = () => {
+    setDownloaded(true);
+    setTimeout(() => setDownloaded(false), 2200);
   };
 
   return (
@@ -68,7 +74,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
           <button
             onClick={onClose}
             aria-label="Close QR standee generator"
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -77,11 +83,15 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
         {/* Controls */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-bold text-slate-700 dark:text-slate-300">Preview Table:</span>
+            <label htmlFor="standee-table-select" className="font-bold text-slate-700 dark:text-slate-300">
+              Preview Table:
+            </label>
             <select
+              id="standee-table-select"
+              aria-label="Select preview table number"
               value={selectedTable}
               onChange={(e) => setSelectedTable(e.target.value)}
-              className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-extrabold text-[#1E60FF] text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+              className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-extrabold text-[#1E60FF] text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
             >
               {tablesList.map((t) => (
                 <option key={t} value={t}>
@@ -94,17 +104,27 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="bg-[#1E60FF] hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow glow-blue cursor-pointer"
+              className="bg-[#1E60FF] hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow glow-blue cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print A6 Standees</span>
             </button>
             <button
-              onClick={() => alert('Downloaded ZIP of high-res print SVGs for Tables 01 to 15.')}
-              className="border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1"
+              onClick={handleDownloadSvg}
+              aria-live="polite"
+              className="border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>SVG Package</span>
+              {downloaded ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                  <span className="text-emerald-600 font-bold">Package Ready</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>SVG Package</span>
+                </>
+              )}
             </button>
           </div>
         </div>
