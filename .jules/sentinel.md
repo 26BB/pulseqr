@@ -18,3 +18,8 @@
 **Vulnerability:** Overriding `console.error` to capture application logs using `JSON.stringify(arg)` throws uncaught `TypeError` exceptions on circular objects, crashing error logging across the app.
 **Learning:** Client-side error collector widgets must wrap object serialization in try/catch fallbacks, truncate message lengths, and enforce HTTP/HTTPS scheme validation on target webhook URLs before dispatch.
 **Prevention:** Always wrap `JSON.stringify` in try/catch inside console interceptors, enforce maximum string length limits, and validate URL schemes with `^https?://`.
+
+## 2026-09-15 - Prevent Unpaired UTF-16 High Surrogates in String Truncation
+**Vulnerability:** Truncating input strings containing multi-byte UTF-16 surrogate pairs (e.g., emojis) with raw `.slice(0, maxLen)` leaves an isolated high surrogate (`0xD800`–`0xDBFF`) at the end, causing `encodeURIComponent()` to throw uncaught `URIError` exceptions and crash click handlers.
+**Learning:** Naive `.slice(0, maxLen)` truncation can split 4-byte UTF-16 surrogate pairs, creating malformed Unicode strings that break URL encoding routines.
+**Prevention:** When truncating strings, check if `sliced.charCodeAt(sliced.length - 1)` is a high surrogate (`0xD800`–`0xDBFF`) and slice one character less (`sliced.slice(0, -1)`). Also wrap `encodeURIComponent()` calls in try/catch blocks.

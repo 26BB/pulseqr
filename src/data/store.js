@@ -7,21 +7,20 @@ const STORAGE_KEY_SETTINGS = "pulseqr_settings_v1";
 // Optimization: In-memory store cache prevents synchronous main-thread localStorage disk reads and JSON.parse on every mutation
 let cachedFeedbacks = null;
 let cachedSettings = null;
-let cachedFeedbacksMap = null;
+// Optimization: Persistent module-scoped Map avoids creating new Map instances on every store update pass, eliminating GC allocation churn
+const cachedFeedbacksMap = new Map();
 
 // Helper to update cachedFeedbacks and maintain module-scoped lookup Map
 const setCachedFeedbacks = (feedbacks) => {
   cachedFeedbacks = feedbacks;
+  cachedFeedbacksMap.clear();
   if (Array.isArray(feedbacks)) {
-    cachedFeedbacksMap = new Map();
     for (let i = 0; i < feedbacks.length; i++) {
       const item = feedbacks[i];
       if (item && item.id) {
         cachedFeedbacksMap.set(item.id, item);
       }
     }
-  } else {
-    cachedFeedbacksMap = null;
   }
 };
 
@@ -59,7 +58,16 @@ const sanitizeString = (str, maxLen = 100, fallback = "") => {
   if (trimmed === str && str.length <= maxLen) {
     return str;
   }
-  return trimmed.length > maxLen ? trimmed.slice(0, maxLen) : trimmed;
+  if (trimmed.length > maxLen) {
+    let sliced = trimmed.slice(0, maxLen);
+    const lastCode = sliced.charCodeAt(sliced.length - 1);
+    // Security: Avoid trailing unpaired high surrogate if maxLen cuts a UTF-16 surrogate pair
+    if (lastCode >= 0xD800 && lastCode <= 0xDBFF) {
+      sliced = sliced.slice(0, -1);
+    }
+    return sliced;
+  }
+  return trimmed;
 };
 
 // Helper to validate and sanitize settings object shape (Security: Cross-tab & LocalStorage input validation)
@@ -125,6 +133,41 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
     return fb;
   }
 
+  // Optimization: O(1) primitive fast-path equality check against existing sanitized item
+  // Bypasses regex executions, string ops (trim, slice, replace), floating point math, and tag array allocations
+  // when incoming storage/broadcast objects match existing cached properties.
+  if (existingItem) {
+    const isTagEqual = () => {
+      if (existingItem.tags === fb.tags) return true;
+      if (!Array.isArray(existingItem.tags) || !Array.isArray(fb.tags)) return false;
+      if (existingItem.tags.length !== fb.tags.length) return false;
+      for (let k = 0; k < fb.tags.length; k++) {
+        if (existingItem.tags[k] !== fb.tags[k]) return false;
+      }
+      return true;
+    };
+
+    if (
+      existingItem.id === fb.id &&
+      existingItem.table === fb.table &&
+      existingItem.timestamp === fb.timestamp &&
+      existingItem.displayTime === fb.displayTime &&
+      existingItem.comment === fb.comment &&
+      existingItem.status === fb.status &&
+      existingItem.barista === fb.barista &&
+      existingItem.guestName === fb.guestName &&
+      existingItem.isAlert === fb.isAlert &&
+      existingItem.resolutionNote === fb.resolutionNote &&
+      existingItem.overallScore === fb.overallScore &&
+      existingItem.ratings?.food === fb.ratings?.food &&
+      existingItem.ratings?.service === fb.ratings?.service &&
+      existingItem.ratings?.ambiance === fb.ratings?.ambiance &&
+      isTagEqual()
+    ) {
+      return existingItem;
+    }
+  }
+
   const food = sanitizeRating(fb.ratings?.food);
   const service = sanitizeRating(fb.ratings?.service);
   const ambiance = sanitizeRating(fb.ratings?.ambiance);
@@ -137,7 +180,12 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   // Security: Sanitize table identifier to alphanumeric, hyphens, and underscores to prevent injection
   const rawTable = sanitizeString(fb.table, 10, "04");
   const table = rawTable.replace(/[^a-zA-Z0-9_-]/g, "") || "04";
-  const timestamp = sanitizeString(fb.timestamp, 50, new Date().toISOString());
+  // Security: Validate timestamp is a valid, parseable ISO date string to prevent malformed date payload injection
+  const rawTimestamp = sanitizeString(fb.timestamp, 50, "");
+  const timestamp =
+    rawTimestamp && !isNaN(Date.parse(rawTimestamp))
+      ? rawTimestamp
+      : new Date().toISOString();
   const displayTime = sanitizeString(fb.displayTime, 30, "Just now");
   const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
   const barista = sanitizeString(fb.barista, 50, "Pranav") || "Pranav";
@@ -264,7 +312,7 @@ const sanitizeFeedbackArray = (arr) => {
   let changedFromInput = arr.length !== sliced.length;
   const result = [];
   for (let i = 0; i < sliced.length; i++) {
-    const cachedItem = cachedFeedbacksMap ? cachedFeedbacksMap.get(sliced[i]?.id) : null;
+    const cachedItem = cachedFeedbacksMap.get(sliced[i]?.id);
     const item = sanitizeFeedbackItem(sliced[i], cachedItem);
     if (item !== sliced[i]) changedFromInput = true;
     if (item) result.push(item);
@@ -481,8 +529,9 @@ export const subscribeToRealtime = (callback) => {
         const sanitized = sanitizeFeedbackArray(parsed);
         callback({ type: "FEEDBACKS_UPDATED", payload: sanitized });
       } catch {
-        setCachedFeedbacks([]);
-        callback({ type: "FEEDBACKS_UPDATED", payload: [] });
+        // Security: Secure fallback to INITIAL_FEEDBACKS consistent with getStoredFeedbacks on parse failure
+        setCachedFeedbacks(INITIAL_FEEDBACKS);
+        callback({ type: "FEEDBACKS_UPDATED", payload: INITIAL_FEEDBACKS });
       }
     } else if (event.key === STORAGE_KEY_SETTINGS) {
       try {
