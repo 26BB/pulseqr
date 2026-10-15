@@ -481,8 +481,9 @@ export const subscribeToRealtime = (callback) => {
         const sanitized = sanitizeFeedbackArray(parsed);
         callback({ type: "FEEDBACKS_UPDATED", payload: sanitized });
       } catch {
-        setCachedFeedbacks([]);
-        callback({ type: "FEEDBACKS_UPDATED", payload: [] });
+        // Security: Secure fallback to INITIAL_FEEDBACKS consistent with getStoredFeedbacks on parse failure
+        setCachedFeedbacks(INITIAL_FEEDBACKS);
+        callback({ type: "FEEDBACKS_UPDATED", payload: INITIAL_FEEDBACKS });
       }
     } else if (event.key === STORAGE_KEY_SETTINGS) {
       try {
