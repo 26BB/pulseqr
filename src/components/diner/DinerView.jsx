@@ -228,8 +228,9 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
 
                 {/* Coral-to-Sunset Button */}
                 <button
+                  type="button"
                   onClick={() => setStep('form')}
-                  className="w-full bg-gradient-to-r from-[#FF6B4A] to-[#FF8C00] hover:from-[#FF5530] hover:to-[#FF7700] text-white font-black py-3.5 rounded-full text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all transform active:scale-95"
+                  className="w-full bg-gradient-to-r from-[#FF6B4A] to-[#FF8C00] hover:from-[#FF5530] hover:to-[#FF7700] text-white font-black py-3.5 rounded-full text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A] focus-visible:ring-offset-2"
                 >
                   <span>Share Your Feedback</span>
                   <ArrowRight className="w-4 h-4" />
@@ -315,7 +316,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#FF6B4A] to-[#FF8C00] hover:from-[#FF5530] hover:to-[#FF7700] text-white font-black py-3 rounded-full text-xs transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer transform active:scale-95"
+                  className="w-full bg-gradient-to-r from-[#FF6B4A] to-[#FF8C00] hover:from-[#FF5530] hover:to-[#FF7700] text-white font-black py-3 rounded-full text-xs transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A] focus-visible:ring-offset-2"
                 >
                   <span>Submit & Reveal Perk</span>
                   <span>🎁</span>
@@ -378,8 +379,9 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                 )}
 
                 <button
+                  type="button"
                   onClick={handleReset}
-                  className="text-xs text-[#FF6B4A] hover:underline font-bold inline-block p-1 cursor-pointer"
+                  className="text-xs text-[#FF6B4A] hover:underline font-bold inline-block p-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A] focus-visible:ring-offset-1 rounded-lg"
                 >
                   Submit another test response
                 </button>

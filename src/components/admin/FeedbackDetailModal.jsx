@@ -38,9 +38,14 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
     if (phoneDigits.length === 10) {
       phoneDigits = '91' + phoneDigits;
     }
-    const encoded = encodeURIComponent(defaultWhatsAppText);
-    window.open(`https://wa.me/${phoneDigits}?text=${encoded}`, '_blank', 'noopener,noreferrer');
-    onResolve(feedback.id, 'RESOLVED', 'Contacted guest via WhatsApp');
+    try {
+      const encoded = encodeURIComponent(defaultWhatsAppText);
+      window.open(`https://wa.me/${phoneDigits}?text=${encoded}`, '_blank', 'noopener,noreferrer');
+      onResolve(feedback.id, 'RESOLVED', 'Contacted guest via WhatsApp');
+    } catch (e) {
+      // Security: Avoid crashing click handler on URI encoding exceptions
+      console.warn('Failed to encode WhatsApp message:', e?.message || e);
+    }
   };
 
   const handleCompVoucher = () => {
