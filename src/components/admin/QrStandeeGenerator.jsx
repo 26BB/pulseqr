@@ -88,10 +88,10 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
             </label>
             <select
               id="standee-table-select"
-              aria-label="Select preview table number"
+              aria-label="Select table number to preview QR standee"
               value={selectedTable}
               onChange={(e) => setSelectedTable(e.target.value)}
-              className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-extrabold text-[#1E60FF] text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
+              className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-extrabold text-[#1E60FF] text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF] cursor-pointer"
             >
               {tablesList.map((t) => (
                 <option key={t} value={t}>
