@@ -41,7 +41,6 @@
 ## 2026-10-20 - Fast-Path Primitive Object Equality Bypass for Store Sanitization
 **Learning:** In real-time storage/broadcast sync loops, running deep field-by-field string cleaning, regex replacements, floating point rounding, and array slicing on incoming objects before checking if they match existing cached items does unnecessary work for unchanged entities.
 **Action:** Perform an O(1) primitive equality check against existing cached items prior to executing sanitization methods. Bypassing regexes, string operations, and array allocations when primitive values match preserves reference identity instantly and eliminates CPU/GC overhead.
-
 ## 2026-10-20 - Lazy Action Parameter Formatting
 **Learning:** Sanitizing string parameters and constructing message payloads in the component render body for action handlers (e.g. external links or API triggers) forces regex replacements and string template allocations on every re-render (such as keypresses in text inputs).
 **Action:** Defer parameter sanitization and message formatting inside the action event handler so high-frequency input state changes do not execute redundant regex passes or allocate unused strings.
