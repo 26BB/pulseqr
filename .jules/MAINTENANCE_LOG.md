@@ -10,12 +10,18 @@
 
 | Date Found | Category | File | Issue | Priority |
 |------------|----------|------|-------|----------|
-| 2026-10-15 | ⚡ Perf | src/components/admin/FeedbackDetailModal.jsx | Deferred WhatsApp formatting optimization (PR #118 had conflicts) | MEDIUM |
 | 2026-10-15 | 🎨 A11y | src/components/admin/QrStandeeGenerator.jsx | Keyboard navigation improvements in Standee Generator modal (PR #119 had conflicts) | MEDIUM |
 
 ---
 
 ## ✅ Completed Log (most recent first)
+
+### 2026-10-15 — WhatsApp Recovery Formatting & Memoization
+**Status:** ✅ Completed
+**Fixed:**
+- ⚡ Hoist `sanitizeMessageParam` outside `FeedbackDetailModal` to avoid re-creation per render
+- ⚡ Memoize personalized WhatsApp recovery template with `useMemo` and WhatsApp markdown formatting (`*cafeName*`, `*Table #table*`)
+**PR:** chore(atlas): optimize WhatsApp recovery message formatting and memoization [2026-10-15]
 
 ### 2026-10-15 — Initial Logbook + Jules Master Bulk Merge
 **Status:** ✅ Bulk merge by Jules Master
