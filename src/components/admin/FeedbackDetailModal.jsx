@@ -19,11 +19,11 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   // Optimization: Defer WhatsApp recovery message string sanitization and template formatting to click execution time
   // so typing resolution notes doesn't run redundant regex parameter sanitization passes on every keystroke.
   const handleWhatsAppClick = () => {
-    // Security: Helper to sanitize values embedded in URLs/messages (strips newlines and control chars)
+    // Security: Helper to sanitize values embedded in URLs/messages (strips newlines, control chars, and collapses redundant spaces)
     const sanitizeMessageParam = (val, fallback = '') => {
       if (val == null || val === '') return fallback;
       // eslint-disable-next-line no-control-regex
-      return String(val).replace(/[\r\n\t\x00-\x1F\x7F]/g, ' ').trim() || fallback;
+      return String(val).replace(/[\r\n\t\x00-\x1F\x7F]+/g, ' ').replace(/\s+/g, ' ').trim() || fallback;
     };
 
     const guestName = sanitizeMessageParam(feedback.guestName, 'there');

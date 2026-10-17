@@ -10,12 +10,16 @@
 
 | Date Found | Category | File | Issue | Priority |
 |------------|----------|------|-------|----------|
-| 2026-10-15 | ⚡ Perf | src/components/admin/FeedbackDetailModal.jsx | Deferred WhatsApp formatting optimization (PR #118 had conflicts) | MEDIUM |
-| 2026-10-15 | 🎨 A11y | src/components/admin/QrStandeeGenerator.jsx | Keyboard navigation improvements in Standee Generator modal (PR #119 had conflicts) | MEDIUM |
 
 ---
 
 ## ✅ Completed Log (most recent first)
+
+### 2026-10-15 — WhatsApp Link Formatting & Control Character Sanitization Optimization
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- ⚡ Optimized WhatsApp recovery link parameter sanitization in `FeedbackDetailModal.jsx` to strip control characters and collapse whitespace into single spaces cleanly.
+**PR:** `chore(atlas): optimize whatsapp formatting in feedback modal`
 
 ### 2026-10-15 — Initial Logbook + Jules Master Bulk Merge
 **Status:** ✅ Bulk merge by Jules Master
