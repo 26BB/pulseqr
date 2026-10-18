@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Printer, Download, ShieldCheck, Check } from 'lucide-react';
 
@@ -17,13 +17,23 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
   const [selectedTable, setSelectedTable] = useState('04');
   const [downloaded, setDownloaded] = useState(false);
   const totalTables = settings?.tableCount || 15;
+  const closeButtonRef = useRef(null);
 
+  // Accessibility: Focus modal close button on mount and restore focus to trigger element on unmount
   useEffect(() => {
+    const previousFocus = document.activeElement;
+    closeButtonRef.current?.focus();
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previousFocus && typeof previousFocus.focus === 'function') {
+        previousFocus.focus();
+      }
+    };
   }, [onClose]);
 
   // Optimization: Memoize tablesList generation so array is re-created only when tableCount changes
@@ -72,6 +82,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
             </div>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label="Close QR standee generator"
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"

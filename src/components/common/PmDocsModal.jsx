@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { X, Target, Users, Rocket, BarChart2, ShieldCheck, CheckSquare, FileText } from 'lucide-react';
 
 const DOCS_LIST = [
@@ -92,13 +92,23 @@ PulseQR is a zero-friction, QR-based table feedback tool designed specifically f
 const PmDocsModal = memo(function PmDocsModal({ onClose }) {
   const [activeDocId, setActiveDocId] = useState('prd');
   const activeDoc = DOCS_LIST.find((d) => d.id === activeDocId) || DOCS_LIST[0];
+  const closeButtonRef = useRef(null);
 
+  // Accessibility: Focus modal close button on mount and restore focus to trigger element on unmount
   useEffect(() => {
+    const previousFocus = document.activeElement;
+    closeButtonRef.current?.focus();
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previousFocus && typeof previousFocus.focus === 'function') {
+        previousFocus.focus();
+      }
+    };
   }, [onClose]);
 
   return (
@@ -129,6 +139,7 @@ const PmDocsModal = memo(function PmDocsModal({ onClose }) {
             </div>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label="Close documentation hub"
             className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A]"
