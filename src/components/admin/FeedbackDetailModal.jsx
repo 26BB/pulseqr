@@ -1,16 +1,26 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Clock, User, Coffee } from 'lucide-react';
 
 // Optimization: Memoize FeedbackDetailModal to prevent unnecessary re-renders when parent state updates while viewing modal details
 const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
   const [note, setNote] = useState('');
+  const closeButtonRef = useRef(null);
 
+  // Accessibility: Focus modal close button on mount and restore focus to trigger element on unmount
   useEffect(() => {
+    const previousFocus = document.activeElement;
+    closeButtonRef.current?.focus();
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previousFocus && typeof previousFocus.focus === 'function') {
+        previousFocus.focus();
+      }
+    };
   }, [onClose]);
 
   if (!feedback) return null;
@@ -68,6 +78,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
         
         {/* Close Button */}
         <button
+          ref={closeButtonRef}
           onClick={onClose}
           aria-label="Close feedback details"
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"

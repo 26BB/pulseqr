@@ -15,6 +15,12 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-16 — Modal Accessibility Focus Placement & Restoration
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Added WCAG 2.1 AA keyboard focus management across `FeedbackDetailModal.jsx`, `QrStandeeGenerator.jsx`, and `PmDocsModal.jsx`: initial focus placement on close button upon mount and automatic focus restoration to triggering element on unmount.
+**PR:** `chore(atlas): add modal focus placement and restoration [2026-10-16]`
+
 ### 2026-10-15 — WhatsApp Link Formatting & Control Character Sanitization Optimization
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
