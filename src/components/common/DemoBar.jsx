@@ -1,8 +1,7 @@
-import React, { memo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { Smartphone, LayoutDashboard, SplitSquareVertical, Zap, RefreshCw, QrCode } from 'lucide-react';
 
-// Optimization: Static array hoisted outside component to prevent array allocation on every render
-const TABLE_OPTIONS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15'];
+const DEFAULT_TABLE_COUNT = 15;
 
 // Optimization: Memoize DemoBar to prevent re-rendering when parent App state changes unless props actually change
 const DemoBar = memo(function DemoBar({
@@ -15,7 +14,13 @@ const DemoBar = memo(function DemoBar({
   alertCount,
   onOpenStandee,
   onOpenDocs,
+  tableCount = DEFAULT_TABLE_COUNT,
 }) {
+  // Optimization: Dynamically compute table options array memoized on tableCount setting
+  const tableOptions = useMemo(() => {
+    const count = Math.min(100, Math.max(1, Number(tableCount) || DEFAULT_TABLE_COUNT));
+    return Array.from({ length: count }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  }, [tableCount]);
   return (
     <header className="sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-md px-4 py-2.5">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -103,7 +108,7 @@ const DemoBar = memo(function DemoBar({
               onChange={(e) => onTableChange(e.target.value)}
               className="bg-transparent font-bold text-[#FFD000] text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD000] rounded cursor-pointer"
             >
-              {TABLE_OPTIONS.map((t) => (
+              {tableOptions.map((t) => (
                 <option key={t} value={t} className="bg-slate-900 text-white">
                   #{t}
                 </option>

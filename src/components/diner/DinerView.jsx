@@ -103,6 +103,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
     const isAlert =
       ratings.food <= (settings?.alertThreshold || 2) ||
       ratings.service <= (settings?.alertThreshold || 2) ||
+      ratings.ambiance <= (settings?.alertThreshold || 2) ||
       overall <= (settings?.alertThreshold || 2);
 
     setLastSubmissionAlert(isAlert);
