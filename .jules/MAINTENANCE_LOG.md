@@ -29,6 +29,12 @@
 - ⚡ Synchronized `DemoBar.jsx` table select dropdown with active `settings.tableCount` prop passed from `App.jsx`, ensuring table switching options remain in sync when cafe settings update active standee count.
 **PR:** `chore(atlas): fix ambiance alert trigger and sync demo bar table count [2026-10-17]`
 
+### 2026-10-17 — Modal Keyboard Focus Trapping
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Added WCAG 2.1 AA keyboard focus trapping (`Tab` and `Shift+Tab`) across `FeedbackDetailModal.jsx`, `QrStandeeGenerator.jsx`, and `PmDocsModal.jsx` to keep active keyboard focus contained within open dialogs.
+**PR:** `chore(atlas): implement modal keyboard focus trapping [2026-10-17]`
+
 ### 2026-10-16 — Modal Accessibility Focus Placement & Restoration
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
