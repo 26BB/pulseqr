@@ -159,6 +159,7 @@ export default function App() {
         alertCount={pendingAlertCount}
         onOpenStandee={handleOpenStandee}
         onOpenDocs={handleOpenDocs}
+        tableCount={settings?.tableCount}
       />
 
       {/* Main Content Area */}

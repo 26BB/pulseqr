@@ -22,6 +22,13 @@
 - 🎨 Added keyboard `Escape` key listener for modal dismissal and managed focus (initial placement on close button on open, focus restoration to trigger button on close).
 **PR:** `chore(atlas): add feedback widget modal accessibility & focus management [2026-10-19]`
 
+### 2026-10-17 — Fix Ambiance Alert Trigger Bug & Sync Demo Bar Table Options
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed missing `ratings.ambiance <= alertThreshold` check in `store.js` (`addFeedback`) and `DinerView.jsx` (`handleSubmit`) so 1★/2★ ambiance ratings correctly trigger real-time damage control alerts.
+- ⚡ Synchronized `DemoBar.jsx` table select dropdown with active `settings.tableCount` prop passed from `App.jsx`, ensuring table switching options remain in sync when cafe settings update active standee count.
+**PR:** `chore(atlas): fix ambiance alert trigger and sync demo bar table count [2026-10-17]`
+
 ### 2026-10-16 — Modal Accessibility Focus Placement & Restoration
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
