@@ -226,15 +226,15 @@
   // 4. Render Widget DOM
   const widgetContainer = document.createElement('div');
   widgetContainer.innerHTML = `
-    <button class="feedback-btn-trigger" id="fbTriggerBtn">
+    <button class="feedback-btn-trigger" id="fbTriggerBtn" aria-haspopup="dialog" aria-expanded="false">
       <span>💬</span> Feedback
     </button>
 
     <div class="feedback-modal-overlay" id="fbModalOverlay">
-      <div class="feedback-card">
+      <div class="feedback-card" role="dialog" aria-modal="true" aria-labelledby="fbModalTitle">
         <div class="feedback-header">
-          <h3>Send Feedback to Dev Team</h3>
-          <button class="feedback-close" id="fbCloseBtn">&times;</button>
+          <h3 id="fbModalTitle">Send Feedback to Dev Team</h3>
+          <button class="feedback-close" id="fbCloseBtn" aria-label="Close feedback modal">&times;</button>
         </div>
 
         <div id="fbFormContainer">
@@ -279,22 +279,41 @@
   const successMsg = document.getElementById('fbSuccessMsg');
 
   // Toggle Modal
-  triggerBtn.addEventListener('click', () => {
+  let previousActiveElement = null;
+
+  const openModal = () => {
+    previousActiveElement = document.activeElement;
+    triggerBtn.setAttribute('aria-expanded', 'true');
     overlay.classList.add('active');
     if (capturedErrors.length > 0) {
       consoleBadge.textContent = `⚠️ ${capturedErrors.length} errors captured`;
     } else {
       consoleBadge.textContent = ``;
     }
-  });
+    // Focus close button on open
+    closeBtn.focus();
+    window.addEventListener('keydown', handleKeyDown);
+  };
 
   const closeModal = () => {
+    triggerBtn.setAttribute('aria-expanded', 'false');
     overlay.classList.remove('active');
     formContainer.style.display = 'block';
     successMsg.style.display = 'none';
     messageInput.value = '';
+    window.removeEventListener('keydown', handleKeyDown);
+    if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+      previousActiveElement.focus();
+    }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  };
+
+  triggerBtn.addEventListener('click', openModal);
   closeBtn.addEventListener('click', closeModal);
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeModal();

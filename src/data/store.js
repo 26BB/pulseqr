@@ -419,6 +419,7 @@ export const addFeedback = (feedbackData) => {
   const isAlert =
     ratings.food <= settings.alertThreshold ||
     ratings.service <= settings.alertThreshold ||
+    ratings.ambiance <= settings.alertThreshold ||
     overall <= settings.alertThreshold;
 
   // Truncate strings & tags (Security: LocalStorage DoS / Quota Exhaustion prevention)
