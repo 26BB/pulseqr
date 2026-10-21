@@ -5,14 +5,33 @@ import { X, MessageSquare, Gift, CheckCircle, AlertTriangle, Clock, User, Coffee
 const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClose, onResolve, settings }) {
   const [note, setNote] = useState('');
   const closeButtonRef = useRef(null);
+  const modalRef = useRef(null);
 
-  // Accessibility: Focus modal close button on mount and restore focus to trigger element on unmount
+  // Accessibility: Focus modal close button on mount, trap focus within dialog, and restore focus on unmount
   useEffect(() => {
     const previousFocus = document.activeElement;
     closeButtonRef.current?.focus();
 
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -70,6 +89,7 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
       <div
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="feedback-modal-title"

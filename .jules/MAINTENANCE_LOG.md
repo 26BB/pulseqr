@@ -15,6 +15,12 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-17 — Modal Keyboard Focus Trapping
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Added WCAG 2.1 AA keyboard focus trapping (`Tab` and `Shift+Tab`) across `FeedbackDetailModal.jsx`, `QrStandeeGenerator.jsx`, and `PmDocsModal.jsx` to keep active keyboard focus contained within open dialogs.
+**PR:** `chore(atlas): implement modal keyboard focus trapping [2026-10-17]`
+
 ### 2026-10-16 — Modal Accessibility Focus Placement & Restoration
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
