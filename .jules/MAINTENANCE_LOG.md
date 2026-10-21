@@ -15,6 +15,13 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-19 — Feedback Widget Modal Accessibility & Focus Management
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Added WCAG 2.1 AA dialog ARIA attributes (`role="dialog"`, `aria-modal="true"`, `aria-labelledby="fbModalTitle"`, `aria-haspopup="dialog"`, `aria-expanded`) to the standalone feedback widget in `public/feedback_widget.js`.
+- 🎨 Added keyboard `Escape` key listener for modal dismissal and managed focus (initial placement on close button on open, focus restoration to trigger button on close).
+**PR:** `chore(atlas): add feedback widget modal accessibility & focus management [2026-10-19]`
+
 ### 2026-10-16 — Modal Accessibility Focus Placement & Restoration
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
