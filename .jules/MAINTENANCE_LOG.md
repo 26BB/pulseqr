@@ -15,6 +15,12 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-19 — Feedback Widget Modal Keyboard Focus Trapping
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Added WCAG 2.1 AA keyboard focus trapping (`Tab` and `Shift+Tab`) to the standalone feedback widget modal in `public/feedback_widget.js`. Focus is contained within visible modal elements when active.
+**PR:** `chore(atlas): implement feedback widget modal focus trapping [2026-10-19]`
+
 ### 2026-10-19 — Feedback Widget Modal Accessibility & Focus Management
 **Status:** ✅ Completed by ATLAS
 **Fixed:**

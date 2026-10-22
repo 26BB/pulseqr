@@ -310,6 +310,30 @@
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       closeModal();
+      return;
+    }
+    // WCAG 2.1 AA (2.4.3 Focus Order): Traps keyboard focus inside modal dialog while active to prevent keyboard navigation from escaping to background DOM
+    if (e.key === 'Tab') {
+      const modalCard = overlay.querySelector('.feedback-card');
+      if (!modalCard) return;
+      const rawFocusables = Array.from(
+        modalCard.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      const focusables = rawFocusables.filter(
+        (el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   };
 
