@@ -238,10 +238,10 @@
         </div>
 
         <div id="fbFormContainer">
-          <div class="feedback-type-tabs">
-            <button class="feedback-tab-btn active" data-type="Bug">🐞 Bug</button>
-            <button class="feedback-tab-btn" data-type="Feature">💡 Feature</button>
-            <button class="feedback-tab-btn" data-type="General">💬 General</button>
+          <div class="feedback-type-tabs" role="tablist" aria-label="Feedback category">
+            <button class="feedback-tab-btn active" role="tab" aria-selected="true" data-type="Bug">🐞 Bug</button>
+            <button class="feedback-tab-btn" role="tab" aria-selected="false" data-type="Feature">💡 Feature</button>
+            <button class="feedback-tab-btn" role="tab" aria-selected="false" data-type="General">💬 General</button>
           </div>
 
           <textarea class="feedback-textarea" id="fbMessage" maxlength="1000" placeholder="Describe the issue or feature request in detail..."></textarea>
@@ -301,6 +301,7 @@
     formContainer.style.display = 'block';
     successMsg.style.display = 'none';
     messageInput.value = '';
+    if (emailInput) emailInput.value = '';
     window.removeEventListener('keydown', handleKeyDown);
     if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
       previousActiveElement.focus();
@@ -310,6 +311,24 @@
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       closeModal();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const modalCard = document.querySelector('.feedback-card');
+      if (!modalCard) return;
+      const focusables = modalCard.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   };
 
@@ -322,8 +341,12 @@
   // Tab Selection
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
+      tabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       selectedType = btn.getAttribute('data-type');
     });
   });
