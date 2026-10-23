@@ -15,6 +15,14 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-20 — Feedback Widget Keyboard Focus Trapping & Tab ARIA Attributes
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Added WCAG 2.1 AA keyboard focus trapping (`Tab` and `Shift+Tab`) inside the standalone feedback collector widget modal (`public/feedback_widget.js`).
+- 🎨 Added `role="tablist"` and `role="tab"` attributes with dynamic `aria-selected` state updates to feedback type selection tab buttons.
+- 🧹 Ensured `emailInput.value` state is cleared alongside message text when closing the feedback modal.
+**PR:** `chore(atlas): implement feedback widget keyboard focus trapping & tab aria [2026-10-20]`
+
 ### 2026-10-19 — Feedback Widget Modal Accessibility & Focus Management
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
