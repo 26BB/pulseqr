@@ -15,6 +15,14 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-21 — Dynamic Category Breakdown SVG Donut Chart Calculation
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- ⚡ Dynamically computed Category Breakdown SVG donut chart arc percentages (`foodPct`, `servicePct`, `ambiancePct`) and SVG `strokeDashoffset` values in `AdminDashboard.jsx` from live feedback store data in `useMemo`.
+- 🎨 Replaced static hardcoded donut chart arc values (`45 55`, `35 65`, `20 80`) with dynamic SVG stroke dash arrays that update seamlessly in real time as feedback scores change.
+- 🎨 Added `aria-hidden="true"` to visual SVG chart element for clean screen reader presentation.
+**PR:** `chore(atlas): dynamic category breakdown donut chart calculation [2026-10-21]`
+
 ### 2026-10-20 — Feedback Widget Keyboard Focus Trapping & Tab ARIA Attributes
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
