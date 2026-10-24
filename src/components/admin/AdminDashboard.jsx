@@ -24,9 +24,22 @@ const AdminDashboard = memo(function AdminDashboard({
   const [filter, setFilter] = useState('all'); // 'all' | 'alert' | '5star'
   const [selectedFeedback, setSelectedFeedback] = useState(null);
 
-  // Optimization: Consolidate overall stats and category averages calculation into a single-pass O(N) loop
+  // Optimization: Consolidate overall stats, category averages, and SVG donut arc segments calculation into a single-pass O(N) loop
   // instead of multiple filter/reduce passes & array allocations.
-  const { total, pendingAlerts, avgRating, totalAlertsCount, avgFood, avgService, avgAmbiance } = useMemo(() => {
+  const {
+    total,
+    pendingAlerts,
+    avgRating,
+    totalAlertsCount,
+    avgFood,
+    avgService,
+    avgAmbiance,
+    foodPct,
+    servicePct,
+    ambiancePct,
+    serviceOffset,
+    ambianceOffset,
+  } = useMemo(() => {
     const totalCount = feedbacks.length;
     let pending = 0;
     let alerts = 0;
@@ -52,6 +65,11 @@ const AdminDashboard = memo(function AdminDashboard({
     }
 
     const divisor = totalCount || 1;
+    const catSum = foodSum + serviceSum + ambianceSum || 1;
+
+    const fPct = Math.round((foodSum / catSum) * 100);
+    const sPct = Math.round((serviceSum / catSum) * 100);
+    const aPct = Math.max(0, 100 - fPct - sPct);
 
     return {
       total: totalCount,
@@ -61,6 +79,11 @@ const AdminDashboard = memo(function AdminDashboard({
       avgFood: (foodSum / divisor).toFixed(1),
       avgService: (serviceSum / divisor).toFixed(1),
       avgAmbiance: (ambianceSum / divisor).toFixed(1),
+      foodPct: fPct,
+      servicePct: sPct,
+      ambiancePct: aPct,
+      serviceOffset: -fPct,
+      ambianceOffset: -(fPct + sPct),
     };
   }, [feedbacks]);
 
@@ -332,11 +355,11 @@ const AdminDashboard = memo(function AdminDashboard({
 
                 <div className="flex items-center gap-4 py-2">
                   <div className="relative w-28 h-28 shrink-0">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
                       <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#F1F5F9" strokeWidth="4"></circle>
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#4A90FF" strokeWidth="4.5" strokeDasharray="45 55" strokeDashoffset="0"></circle>
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10B981" strokeWidth="4.5" strokeDasharray="35 65" strokeDashoffset="-45"></circle>
-                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#FF6B6B" strokeWidth="4.5" strokeDasharray="20 80" strokeDashoffset="-80"></circle>
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#4A90FF" strokeWidth="4.5" strokeDasharray={`${foodPct} ${100 - foodPct}`} strokeDashoffset="0"></circle>
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10B981" strokeWidth="4.5" strokeDasharray={`${servicePct} ${100 - servicePct}`} strokeDashoffset={serviceOffset}></circle>
+                      <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#FF6B6B" strokeWidth="4.5" strokeDasharray={`${ambiancePct} ${100 - ambiancePct}`} strokeDashoffset={ambianceOffset}></circle>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                       <span className="text-sm font-black text-slate-900">{avgRating}★</span>
