@@ -65,20 +65,20 @@ const AdminDashboard = memo(function AdminDashboard({
     }
 
     const divisor = totalCount || 1;
-    const catSum = foodSum + serviceSum + ambianceSum || 1;
+    const catSum = foodSum + serviceSum + ambianceSum;
 
-    const fPct = Math.round((foodSum / catSum) * 100);
-    const sPct = Math.round((serviceSum / catSum) * 100);
-    const aPct = Math.max(0, 100 - fPct - sPct);
+    const fPct = totalCount && catSum ? Math.round((foodSum / catSum) * 100) : 0;
+    const sPct = totalCount && catSum ? Math.round((serviceSum / catSum) * 100) : 0;
+    const aPct = totalCount && catSum ? Math.max(0, 100 - fPct - sPct) : 0;
 
     return {
       total: totalCount,
       pendingAlerts: pending,
-      avgRating: (scoreSum / divisor).toFixed(1),
+      avgRating: totalCount ? (scoreSum / divisor).toFixed(1) : '0.0',
       totalAlertsCount: alerts,
-      avgFood: (foodSum / divisor).toFixed(1),
-      avgService: (serviceSum / divisor).toFixed(1),
-      avgAmbiance: (ambianceSum / divisor).toFixed(1),
+      avgFood: totalCount ? (foodSum / divisor).toFixed(1) : '0.0',
+      avgService: totalCount ? (serviceSum / divisor).toFixed(1) : '0.0',
+      avgAmbiance: totalCount ? (ambianceSum / divisor).toFixed(1) : '0.0',
       foodPct: fPct,
       servicePct: sPct,
       ambiancePct: aPct,
@@ -333,13 +333,24 @@ const AdminDashboard = memo(function AdminDashboard({
 
               {/* Feed Items */}
               <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-                {filteredFeedbacks.map((fb) => (
-                  <FeedbackCard
-                    key={fb.id}
-                    fb={fb}
-                    onSelect={handleSelectFeedback}
-                  />
-                ))}
+                {filteredFeedbacks.length === 0 ? (
+                  <div className="py-12 text-center text-slate-400">
+                    <p className="text-xs font-bold text-slate-600">No feedback entries found</p>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      {filter === 'all'
+                        ? 'No feedback has been submitted yet.'
+                        : `No feedback items match the "${filter === 'alert' ? 'Alerts' : '5★ Praises'}" filter.`}
+                    </p>
+                  </div>
+                ) : (
+                  filteredFeedbacks.map((fb) => (
+                    <FeedbackCard
+                      key={fb.id}
+                      fb={fb}
+                      onSelect={handleSelectFeedback}
+                    />
+                  ))
+                )}
               </div>
 
             </div>
