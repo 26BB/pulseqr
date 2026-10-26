@@ -22,6 +22,12 @@
 - 🎨 Added an accessible empty state message card to `AdminDashboard.jsx` when live feedback stream filters (`all`, `alert`, `5star`) yield 0 results.
 - ⚡ Dynamically bounded demo table number selection in `generateRandomDemoFeedback` (`src/data/store.js`) to active `settings.tableCount` setting.
 **PR:** `chore(atlas): zero feedback donut calc and dynamic demo feedback table range [2026-10-22]`
+### 2026-10-25 — Empty Data Category Donut Calculation & Feedback Stream Empty State
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed empty data donut chart percentage fallbacks in `AdminDashboard.jsx` so `foodPct`, `servicePct`, and `ambiancePct` return `0` when `totalCount` or `catSum` is 0, preventing a false 100% ambiance donut arc when no feedbacks exist.
+- 🎨 Added an explicit empty state UI indicator in `AdminDashboard.jsx` when `filteredFeedbacks` is empty (e.g., when filtering by alerts or when store data is cleared).
+**PR:** `chore(atlas): fix empty data category donut calculation and add stream empty state [2026-10-25]`
 
 ### 2026-10-21 — Dynamic Category Breakdown SVG Donut Chart Calculation
 **Status:** ✅ Completed by ATLAS
