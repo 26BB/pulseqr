@@ -15,6 +15,13 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-25 — Empty Data Category Donut Calculation & Feedback Stream Empty State
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed empty data donut chart percentage fallbacks in `AdminDashboard.jsx` so `foodPct`, `servicePct`, and `ambiancePct` return `0` when `totalCount` or `catSum` is 0, preventing a false 100% ambiance donut arc when no feedbacks exist.
+- 🎨 Added an explicit empty state UI indicator in `AdminDashboard.jsx` when `filteredFeedbacks` is empty (e.g., when filtering by alerts or when store data is cleared).
+**PR:** `chore(atlas): fix empty data category donut calculation and add stream empty state [2026-10-25]`
+
 ### 2026-10-21 — Dynamic Category Breakdown SVG Donut Chart Calculation
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
