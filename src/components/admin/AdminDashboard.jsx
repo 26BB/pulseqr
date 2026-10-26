@@ -334,12 +334,15 @@ const AdminDashboard = memo(function AdminDashboard({
               {/* Feed Items */}
               <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
                 {filteredFeedbacks.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400">
-                    <p className="text-xs font-bold text-slate-600">No feedback entries found</p>
+                  <div className="text-center py-12 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <span className="text-3xl block mb-2">☕</span>
+                    <p className="text-xs font-bold text-slate-700">No feedbacks found for this filter</p>
                     <p className="text-[11px] text-slate-400 mt-1">
-                      {filter === 'all'
-                        ? 'No feedback has been submitted yet.'
-                        : `No feedback items match the "${filter === 'alert' ? 'Alerts' : '5★ Praises'}" filter.`}
+                      {filter === 'alert'
+                        ? 'Great job! All customer alerts have been resolved or no alerts triggered.'
+                        : filter === '5star'
+                        ? 'No 5-star reviews recorded yet.'
+                        : 'No feedbacks recorded yet. Use "Simulate Scan" to generate demo feedback.'}
                     </p>
                   </div>
                 ) : (

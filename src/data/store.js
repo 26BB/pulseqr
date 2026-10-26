@@ -557,8 +557,10 @@ export const subscribeToRealtime = (callback) => {
 };
 
 export const generateRandomDemoFeedback = () => {
-  const tables = ["01", "02", "04", "07", "09", "11", "12", "15"];
-  const randomTable = tables[Math.floor(Math.random() * tables.length)];
+  const settings = getStoredSettings();
+  const maxTable = settings?.tableCount || 15;
+  const tableNum = Math.floor(Math.random() * maxTable) + 1;
+  const randomTable = tableNum.toString().padStart(2, '0');
   const isBad = Math.random() < 0.35; // 35% chance of bad review to show off alert system
 
   if (isBad) {
