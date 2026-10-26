@@ -67,18 +67,18 @@ const AdminDashboard = memo(function AdminDashboard({
     const divisor = totalCount || 1;
     const catSum = foodSum + serviceSum + ambianceSum;
 
-    const fPct = catSum > 0 ? Math.round((foodSum / catSum) * 100) : 0;
-    const sPct = catSum > 0 ? Math.round((serviceSum / catSum) * 100) : 0;
-    const aPct = catSum > 0 ? Math.max(0, 100 - fPct - sPct) : 0;
+    const fPct = totalCount && catSum ? Math.round((foodSum / catSum) * 100) : 0;
+    const sPct = totalCount && catSum ? Math.round((serviceSum / catSum) * 100) : 0;
+    const aPct = totalCount && catSum ? Math.max(0, 100 - fPct - sPct) : 0;
 
     return {
       total: totalCount,
       pendingAlerts: pending,
-      avgRating: (scoreSum / divisor).toFixed(1),
+      avgRating: totalCount ? (scoreSum / divisor).toFixed(1) : '0.0',
       totalAlertsCount: alerts,
-      avgFood: (foodSum / divisor).toFixed(1),
-      avgService: (serviceSum / divisor).toFixed(1),
-      avgAmbiance: (ambianceSum / divisor).toFixed(1),
+      avgFood: totalCount ? (foodSum / divisor).toFixed(1) : '0.0',
+      avgService: totalCount ? (serviceSum / divisor).toFixed(1) : '0.0',
+      avgAmbiance: totalCount ? (ambianceSum / divisor).toFixed(1) : '0.0',
       foodPct: fPct,
       servicePct: sPct,
       ambiancePct: aPct,
