@@ -15,6 +15,14 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-22 — Zero Feedback Donut Calculation & Dynamic Demo Feedback Table Range
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed Category Breakdown donut chart percentage calculation in `AdminDashboard.jsx` when category score sum is 0 (so empty/zero feedback lists don't default Ambiance to 100%).
+- 🎨 Added an accessible empty state message card to `AdminDashboard.jsx` when live feedback stream filters (`all`, `alert`, `5star`) yield 0 results.
+- ⚡ Dynamically bounded demo table number selection in `generateRandomDemoFeedback` (`src/data/store.js`) to active `settings.tableCount` setting.
+**PR:** `chore(atlas): zero feedback donut calc and dynamic demo feedback table range [2026-10-22]`
+
 ### 2026-10-21 — Dynamic Category Breakdown SVG Donut Chart Calculation
 **Status:** ✅ Completed by ATLAS
 **Fixed:**

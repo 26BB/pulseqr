@@ -65,11 +65,11 @@ const AdminDashboard = memo(function AdminDashboard({
     }
 
     const divisor = totalCount || 1;
-    const catSum = foodSum + serviceSum + ambianceSum || 1;
+    const catSum = foodSum + serviceSum + ambianceSum;
 
-    const fPct = Math.round((foodSum / catSum) * 100);
-    const sPct = Math.round((serviceSum / catSum) * 100);
-    const aPct = Math.max(0, 100 - fPct - sPct);
+    const fPct = catSum > 0 ? Math.round((foodSum / catSum) * 100) : 0;
+    const sPct = catSum > 0 ? Math.round((serviceSum / catSum) * 100) : 0;
+    const aPct = catSum > 0 ? Math.max(0, 100 - fPct - sPct) : 0;
 
     return {
       total: totalCount,
@@ -333,13 +333,27 @@ const AdminDashboard = memo(function AdminDashboard({
 
               {/* Feed Items */}
               <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-                {filteredFeedbacks.map((fb) => (
-                  <FeedbackCard
-                    key={fb.id}
-                    fb={fb}
-                    onSelect={handleSelectFeedback}
-                  />
-                ))}
+                {filteredFeedbacks.length === 0 ? (
+                  <div className="text-center py-12 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <span className="text-3xl block mb-2">☕</span>
+                    <p className="text-xs font-bold text-slate-700">No feedbacks found for this filter</p>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      {filter === 'alert'
+                        ? 'Great job! All customer alerts have been resolved or no alerts triggered.'
+                        : filter === '5star'
+                        ? 'No 5-star reviews recorded yet.'
+                        : 'No feedbacks recorded yet. Use "Simulate Scan" to generate demo feedback.'}
+                    </p>
+                  </div>
+                ) : (
+                  filteredFeedbacks.map((fb) => (
+                    <FeedbackCard
+                      key={fb.id}
+                      fb={fb}
+                      onSelect={handleSelectFeedback}
+                    />
+                  ))
+                )}
               </div>
 
             </div>
