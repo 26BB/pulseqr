@@ -15,6 +15,12 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-25 — Zero Feedback Category Averages in Analytics View
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed Category Breakdown scores in `AnalyticsView.jsx` when `feedbacks` list is empty (`total === 0`), returning `'0.0'` for category averages and `'0%'` for bar widths instead of hardcoded default mock scores (4.4, 4.6, 3.8). This ensures Analytics metrics remain in sync with AdminDashboard zero state when resetting or clearing store data.
+**PR:** `chore(atlas): fix zero feedback category averages in analytics view [2026-10-25]`
+
 ### 2026-10-25 — Zero Feedback Donut Calculation & Dynamic Demo Feedback Table Range
 **Status:** ✅ Completed by ATLAS
 **Fixed:**

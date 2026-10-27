@@ -9,13 +9,15 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
   const { avgFood, avgService, avgAmbiance, foodPct, servicePct, ambiancePct } = useMemo(() => {
     const total = feedbacks.length;
     if (!total) {
+      // Fix: Return 0.0 scores & 0% percentages when no feedbacks exist (e.g. store reset)
+      // so Analytics tab metrics stay synchronized with AdminDashboard overall zero state.
       return {
-        avgFood: '4.4',
-        avgService: '4.6',
-        avgAmbiance: '3.8',
-        foodPct: '88%',
-        servicePct: '92%',
-        ambiancePct: '76%',
+        avgFood: '0.0',
+        avgService: '0.0',
+        avgAmbiance: '0.0',
+        foodPct: '0%',
+        servicePct: '0%',
+        ambiancePct: '0%',
       };
     }
 
