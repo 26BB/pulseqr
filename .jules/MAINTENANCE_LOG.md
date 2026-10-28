@@ -15,6 +15,13 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-26 — Analytics View Zero Feedback Fallback & Standee Table Bounds Check
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed Analytics View category averages and progress bar percentage calculations in `AnalyticsView.jsx` when `feedbacks` dataset is empty (`total === 0`) to return `'0.0'` and `'0%'` instead of hardcoded mock numbers (`4.4`, `4.6`, `3.8`, `88%`, `92%`, `76%`).
+- ⚡ Added render-time table bounds derivation (`safeTable`) in `QrStandeeGenerator.jsx` to ensure `selectedTable` automatically defaults to `'01'` if the configured `settings.tableCount` decreases below the active selection.
+**PR:** `chore(atlas): analytics zero feedback fallback & standee table bounds check [2026-10-26]`
+
 ### 2026-10-25 — Zero Feedback Donut Calculation & Dynamic Demo Feedback Table Range
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
