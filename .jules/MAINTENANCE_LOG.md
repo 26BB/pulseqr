@@ -15,6 +15,12 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-29 — Zero Feedback Category Score Calculation in Analytics View
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed category score calculations in `AnalyticsView.jsx` when `feedbacks.length` is 0 so `avgFood`, `avgService`, and `avgAmbiance` return `'0.0'` and progress bar percentages return `'0%'` instead of false fallback numbers (`4.4`, `4.6`, `3.8` / `88%`, `92%`, `76%`).
+**PR:** `chore(atlas): fix zero feedback category calculation in analytics view [2026-10-29]`
+
 ### 2026-10-25 — Zero Feedback Donut Calculation & Dynamic Demo Feedback Table Range
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
