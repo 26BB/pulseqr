@@ -10,12 +10,12 @@ const AnalyticsView = memo(function AnalyticsView({ feedbacks }) {
     const total = feedbacks.length;
     if (!total) {
       return {
-        avgFood: '4.4',
-        avgService: '4.6',
-        avgAmbiance: '3.8',
-        foodPct: '88%',
-        servicePct: '92%',
-        ambiancePct: '76%',
+        avgFood: '0.0',
+        avgService: '0.0',
+        avgAmbiance: '0.0',
+        foodPct: '0%',
+        servicePct: '0%',
+        ambiancePct: '0%',
       };
     }
 
