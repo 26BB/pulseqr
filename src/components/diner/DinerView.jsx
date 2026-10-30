@@ -85,6 +85,14 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
   const [comment, setComment] = useState('');
   const [copied, setCopied] = useState(false);
   const [lastSubmissionAlert, setLastSubmissionAlert] = useState(false);
+  const stepHeadingRef = React.useRef(null);
+
+  // Accessibility: Focus active step heading when step state transitions so screen reader & keyboard users maintain context
+  React.useEffect(() => {
+    if (stepHeadingRef.current && typeof stepHeadingRef.current.focus === 'function') {
+      stepHeadingRef.current.focus();
+    }
+  }, [step]);
 
   // Optimization: Memoize callbacks with empty dependency arrays to maintain stable references for EmojiRatingCategory and PresetTagChip
   const handleRating = useCallback((category, val) => {
@@ -210,7 +218,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                   Takes less than 15 seconds
                 </span>
 
-                <h2 className="text-xl font-black text-[#251912] leading-snug mt-2 mb-1.5">
+                <h2 ref={stepHeadingRef} tabIndex={-1} className="text-xl font-black text-[#251912] leading-snug mt-2 mb-1.5 focus:outline-none">
                   How was your experience at {settings?.cafeName || 'Brew & Beans'}?
                 </h2>
 
@@ -252,7 +260,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
             <form onSubmit={handleSubmit} className="my-auto py-1">
               <div className="bg-white rounded-[28px] p-4 shadow-xl border border-white/80">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                  <span className="font-black text-xs text-[#251912]">Rate your visit:</span>
+                  <span ref={stepHeadingRef} tabIndex={-1} className="font-black text-xs text-[#251912] focus:outline-none">Rate your visit:</span>
                   <span className="bg-[#FFF4EE] text-[#FF6B4A] text-[10px] font-black px-2 py-0.5 rounded-full">
                     Step 2 of 2
                   </span>
@@ -334,7 +342,7 @@ const DinerView = memo(function DinerView({ table = '04', onSubmitFeedback, sett
                   ✓
                 </div>
 
-                <h3 className="text-xl font-black text-[#251912] mb-1">
+                <h3 ref={stepHeadingRef} tabIndex={-1} className="text-xl font-black text-[#251912] mb-1 focus:outline-none">
                   Thank You! 🎉
                 </h3>
                 <p className="text-xs text-[#6B584F] max-w-[220px] mx-auto mb-4 leading-relaxed">

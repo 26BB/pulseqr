@@ -92,8 +92,10 @@ const sanitizeSettings = (obj) => {
   const discountCode = ALPHANUM_HYPHEN_REGEX.test(rawDiscountCode)
     ? rawDiscountCode
     : (rawDiscountCode.replace(/[^a-zA-Z0-9_-]/g, '') || INITIAL_SETTINGS.discountCode);
-  const alertThreshold = Math.min(5, Math.max(1, Math.round(Number(obj.alertThreshold) || 2)));
-  const tableCount = Math.min(100, Math.max(1, Math.round(Number(obj.tableCount) || 15)));
+  const rawThreshold = Number(obj.alertThreshold);
+  const alertThreshold = isNaN(rawThreshold) ? INITIAL_SETTINGS.alertThreshold : Math.min(5, Math.max(1, Math.round(rawThreshold)));
+  const rawTableCount = Number(obj.tableCount);
+  const tableCount = isNaN(rawTableCount) ? INITIAL_SETTINGS.tableCount : Math.min(100, Math.max(1, Math.round(rawTableCount)));
 
   if (
     obj.cafeName === cafeName &&
@@ -190,12 +192,13 @@ const sanitizeFeedbackItem = (fb, existingItem = null) => {
   const comment = sanitizeString(fb.comment, 500, "No written comment provided.") || "No written comment provided.";
   const barista = sanitizeString(fb.barista, 50, "Pranav") || "Pranav";
   const guestName = sanitizeString(fb.guestName, 50, "Guest") || "Guest";
-  const isAlert = Boolean(fb.isAlert);
-  const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
 
   const overall = typeof fb.overallScore === "number" && !isNaN(fb.overallScore)
     ? Number(fb.overallScore.toFixed(1))
     : Number(((food + service + ambiance) / 3).toFixed(1));
+
+  const isAlert = fb.isAlert !== undefined ? Boolean(fb.isAlert) : (food <= 2 || service <= 2 || ambiance <= 2 || overall <= 2);
+  const resolutionNote = fb.resolutionNote !== undefined ? sanitizeString(fb.resolutionNote, 500, "") : undefined;
 
   let safeTags = fb.tags;
   if (!Array.isArray(fb.tags)) {
