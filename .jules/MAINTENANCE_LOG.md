@@ -15,6 +15,15 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-30 — Settings Zero Coercion Fix & Diner View Focus Management
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Fixed numeric settings sanitization in `store.js` (`sanitizeSettings`) using `isNaN` checks to prevent falsy `0` inputs from resetting `tableCount` or `alertThreshold` to default fallbacks (`15` or `2`).
+- 🛡️ Added fallback `isAlert` evaluation in `store.js` (`sanitizeFeedbackItem`) when `fb.isAlert` is omitted from raw untrusted storage payloads.
+- 🎨 Added `aria-live="polite"` live status announcement to `SettingsView.jsx` save confirmation state and handled empty string states for table count input.
+- 🎨 Added step transition focus management in `DinerView.jsx` (`stepHeadingRef`) so keyboard and screen reader users maintain context when navigating steps.
+**PR:** `chore(atlas): fix settings zero coercion and diner view focus management [2026-10-30]`
+
 ### 2026-10-29 — Zero Feedback Category Score Calculation in Analytics View
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
@@ -28,6 +37,7 @@
 - 🎨 Added an accessible empty state message card to `AdminDashboard.jsx` when live feedback stream filters (`all`, `alert`, `5star`) yield 0 results.
 - ⚡ Dynamically bounded demo table number selection in `generateRandomDemoFeedback` (`src/data/store.js`) to active `settings.tableCount` setting.
 **PR:** `chore(atlas): zero feedback donut calc and dynamic demo feedback table range [2026-10-22]`
+
 ### 2026-10-25 — Empty Data Category Donut Calculation & Feedback Stream Empty State
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
@@ -82,23 +92,6 @@
 **Fixed:**
 - ⚡ Optimized WhatsApp recovery link parameter sanitization in `FeedbackDetailModal.jsx` to strip control characters and collapse whitespace into single spaces cleanly.
 **PR:** `chore(atlas): optimize whatsapp formatting in feedback modal`
-
-### 2026-10-15 — Initial Logbook + Jules Master Bulk Merge
-**Status:** ✅ Bulk merge by Jules Master
-**Fixed:**
-- 🛡️ Add ISO date parsing validation to store sanitization (#120)
-- 🛡️ Fix unpaired UTF-16 surrogate truncation & URI encoding exceptions (#116)
-- 🛡️ Fix cross-tab storage event parse failure fallback (#114)
-- 🛡️ Synchronize sanitized settings payload into local component state (#111)
-- 🛡️ Add email format validation to feedback collector widget (#113)
-- ⚡ O(1) fast-path sanitization bypass and persistent Map re-use in store (#115)
-- ⚡ Pre-compute category score percentages & update list keys in AnalyticsView (#110)
-- 🎨 Improve keyboard focus accessibility on Diner view CTA buttons (#117)
-- 🎨 Improve QR standee generator accessibility & inline download feedback (#112)
-**Deferred to backlog:**
-- PR #118 (Bolt: WhatsApp formatting) — merge conflicts
-- PR #119 (Palette: Standee Generator a11y) — merge conflicts
-**PR:** #110–120 (squash merged by Jules Master)
 
 ---
 

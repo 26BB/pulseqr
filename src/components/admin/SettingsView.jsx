@@ -118,9 +118,9 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
                 id="settings-table-count"
                 type="number"
                 min="1"
-                max="50"
-                value={formData.tableCount}
-                onChange={(e) => handleChange('tableCount', Number(e.target.value))}
+                max="100"
+                value={formData.tableCount ?? ''}
+                onChange={(e) => handleChange('tableCount', e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
               />
             </div>
@@ -235,16 +235,17 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
         <div className="flex items-center justify-between pt-2">
           <button
             type="submit"
+            aria-live="polite"
             className="bg-[#1E60FF] hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl text-xs shadow-lg glow-blue flex items-center gap-2 cursor-pointer"
           >
             {saved ? (
               <>
-                <Check className="w-4 h-4 text-[#FFD000]" />
+                <Check className="w-4 h-4 text-[#FFD000]" aria-hidden="true" />
                 <span>Settings Saved!</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4" />
+                <Save className="w-4 h-4" aria-hidden="true" />
                 <span>Save All Settings</span>
               </>
             )}
@@ -255,7 +256,7 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
             onClick={onResetData}
             className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-xs font-semibold flex items-center gap-1.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Reset Demo Data</span>
           </button>
         </div>
