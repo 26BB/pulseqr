@@ -48,11 +48,14 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
   // Optimization: Defer WhatsApp recovery message string sanitization and template formatting to click execution time
   // so typing resolution notes doesn't run redundant regex parameter sanitization passes on every keystroke.
   const handleWhatsAppClick = () => {
-    // Security: Helper to sanitize values embedded in URLs/messages (strips newlines, control chars, and collapses redundant spaces)
+    // Security: Helper to sanitize values embedded in URLs/messages (strips newlines, control chars, collapses spaces, and ensures Unicode well-formedness)
     const sanitizeMessageParam = (val, fallback = '') => {
       if (val == null || val === '') return fallback;
       // eslint-disable-next-line no-control-regex
-      return String(val).replace(/[\r\n\t\x00-\x1F\x7F]+/g, ' ').replace(/\s+/g, ' ').trim() || fallback;
+      const clean = String(val).replace(/[\r\n\t\x00-\x1F\x7F]+/g, ' ').replace(/\s+/g, ' ').trim() || fallback;
+      return typeof clean.toWellFormed === 'function'
+        ? clean.toWellFormed()
+        : clean.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
     };
 
     const guestName = sanitizeMessageParam(feedback.guestName, 'there');

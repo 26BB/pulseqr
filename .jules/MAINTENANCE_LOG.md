@@ -15,6 +15,13 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-11-01 — QR Standee Table Count Synchronization & Unicode WhatsApp Parameter Sanitization
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🎨 Synchronized `selectedTable` state in `QrStandeeGenerator.jsx` with active `settings.tableCount` bounds (`tablesList`) so reducing cafe standee counts resets preview mockup and generated QR URLs to an in-bounds table instead of remaining stuck on an invalid table selection.
+- 🛡️ Hardened `sanitizeMessageParam` in `FeedbackDetailModal.jsx` to ensure Unicode well-formedness and strip unpaired UTF-16 surrogates (`toWellFormed()` / surrogate regex fallback), preventing `URIError` exceptions in `encodeURIComponent` when generating WhatsApp damage-control recovery links.
+**PR:** `chore(atlas): sync qr standee selected table with table count and sanitize whatsapp params [2026-11-01]`
+
 ### 2026-10-30 — Settings Zero Coercion Fix & Diner View Focus Management
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
