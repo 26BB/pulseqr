@@ -138,23 +138,24 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
         </div>
 
         {/* Ratings Breakdown Grid */}
+        {/* Defensive: Optional chaining fallback prevents TypeError if feedback ratings are omitted or malformed */}
         <div className="grid grid-cols-3 gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 mb-4 text-center">
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase">Food</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.food}★
+              {feedback.ratings?.food ?? '-'}★
             </div>
           </div>
           <div className="border-x border-slate-200 dark:border-slate-700">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Service</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.service}★
+              {feedback.ratings?.service ?? '-'}★
             </div>
           </div>
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase">Ambiance</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.ambiance}★
+              {feedback.ratings?.ambiance ?? '-'}★
             </div>
           </div>
         </div>

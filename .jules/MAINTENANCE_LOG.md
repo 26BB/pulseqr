@@ -15,6 +15,12 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-11-03 — Feedback Modal Defensive Ratings Chaining
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Safeguarded category ratings access in `FeedbackDetailModal.jsx` using optional chaining and fallback (`feedback.ratings?.food ?? '-'`, `feedback.ratings?.service ?? '-'`, `feedback.ratings?.ambiance ?? '-'`) to prevent unhandled `TypeError` exceptions if feedback objects lack ratings.
+**PR:** `chore(atlas): safeguard feedback detail ratings access [2026-11-03]`
+
 ### 2026-10-30 — Settings Zero Coercion Fix & Diner View Focus Management
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
