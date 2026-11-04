@@ -142,19 +142,19 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase">Food</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.food}★
+              {feedback.ratings?.food ?? '—'}★
             </div>
           </div>
           <div className="border-x border-slate-200 dark:border-slate-700">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Service</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.service}★
+              {feedback.ratings?.service ?? '—'}★
             </div>
           </div>
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase">Ambiance</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.ambiance}★
+              {feedback.ratings?.ambiance ?? '—'}★
             </div>
           </div>
         </div>
@@ -194,8 +194,16 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
           </div>
         )}
 
+        {/* Standard Feedback Acknowledged State */}
+        {!isAlert && feedback.status !== 'RESOLVED' && (
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-2xl p-3 mb-2 text-xs text-blue-800 dark:text-blue-300">
+            <strong className="block font-bold">✓ Feedback Acknowledged</strong>
+            <p className="mt-0.5">Rating meets or exceeds positive service thresholds. No floor damage control required.</p>
+          </div>
+        )}
+
         {/* Alert Damage Control Actions */}
-        {feedback.status !== 'RESOLVED' && (
+        {isAlert && (
           <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
             <div className="text-xs font-bold text-slate-800 dark:text-white">
               Instant Founder's Office / Manager Actions:

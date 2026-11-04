@@ -15,6 +15,14 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-31 — Scoped Damage Control Actions & Ratings Null-Safety in Feedback Detail Modal
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Scoped emergency damage control actions (WhatsApp apology, comp voucher, resolution notes) to active alerts (`isAlert &&`), preventing positive and standard 4★/5★ diner reviews from displaying emergency damage control flows.
+- 🎨 Added an accessible acknowledged status message for positive and non-alert reviews when viewed by the cafe manager.
+- 🛡️ Added optional chaining (`feedback.ratings?.food`, `service`, `ambiance`) in the ratings grid with fallback dashes (`—`) to prevent runtime `TypeError` crashes on missing or undefined rating objects.
+**PR:** `chore(atlas): scope modal damage control to active alerts and guard rating nulls [2026-10-31]`
+
 ### 2026-10-30 — Settings Zero Coercion Fix & Diner View Focus Management
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
