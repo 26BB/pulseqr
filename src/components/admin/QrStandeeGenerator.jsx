@@ -16,9 +16,15 @@ const QR_IMAGE_SETTINGS = {
 const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings }) {
   const [selectedTable, setSelectedTable] = useState('04');
   const [downloaded, setDownloaded] = useState(false);
-  const totalTables = settings?.tableCount || 15;
+  const totalTables = Math.min(100, Math.max(1, Number(settings?.tableCount) || 15));
   const closeButtonRef = useRef(null);
   const modalRef = useRef(null);
+
+  // UX/Resilience: Bound selectedTable within active 1..totalTables range when cafe settings update
+  const effectiveSelectedTable = useMemo(() => {
+    const num = Number(selectedTable);
+    return !num || num < 1 || num > totalTables ? '01' : selectedTable;
+  }, [selectedTable, totalTables]);
 
   // Accessibility: Focus modal close button on mount, trap focus within dialog, and restore focus on unmount
   useEffect(() => {
@@ -64,8 +70,8 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
   // Optimization: Memoize diner URL calculation per selected table to avoid URL parsing and string concatenation on every render
   const dinerUrl = useMemo(() => {
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?view=diner&table=${encodeURIComponent(selectedTable)}`;
-  }, [selectedTable]);
+    return `${baseUrl}?view=diner&table=${encodeURIComponent(effectiveSelectedTable)}`;
+  }, [effectiveSelectedTable]);
 
   const handlePrint = () => {
     window.print();
@@ -120,7 +126,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
             <select
               id="standee-table-select"
               aria-label="Select table number to preview QR standee"
-              value={selectedTable}
+              value={effectiveSelectedTable}
               onChange={(e) => setSelectedTable(e.target.value)}
               className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-extrabold text-[#1E60FF] text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF] cursor-pointer"
             >
@@ -184,7 +190,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
 
               {/* Table Pill */}
               <div className="inline-block bg-[#FFD000] text-slate-950 font-black px-5 py-1.5 rounded-full text-sm my-4 shadow-lg glow-yellow tracking-wider">
-                TABLE #{selectedTable}
+                TABLE #{effectiveSelectedTable}
               </div>
 
               {/* Dynamic QR Code Surface */}
@@ -216,7 +222,7 @@ const QrStandeeGenerator = memo(function QrStandeeGenerator({ onClose, settings 
         </div>
 
         <div className="text-center text-xs text-slate-400 mt-4">
-          Scan with your real phone to test live feedback submission on Table #{selectedTable}!
+          Scan with your real phone to test live feedback submission on Table #{effectiveSelectedTable}!
         </div>
 
       </div>

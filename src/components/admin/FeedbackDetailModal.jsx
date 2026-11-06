@@ -142,19 +142,20 @@ const FeedbackDetailModal = memo(function FeedbackDetailModal({ feedback, onClos
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase">Food</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.food}★
+              {/* Resilience: Safe optional access with fallback prevents unhandled TypeError crashes if ratings object is missing */}
+              {feedback.ratings?.food ?? '-'}★
             </div>
           </div>
           <div className="border-x border-slate-200 dark:border-slate-700">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Service</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.service}★
+              {feedback.ratings?.service ?? '-'}★
             </div>
           </div>
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase">Ambiance</div>
             <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-              {feedback.ratings.ambiance}★
+              {feedback.ratings?.ambiance ?? '-'}★
             </div>
           </div>
         </div>
