@@ -30,6 +30,7 @@ const AdminDashboard = memo(function AdminDashboard({
     total,
     pendingAlerts,
     avgRating,
+    ratingSubtitle,
     totalAlertsCount,
     avgFood,
     avgService,
@@ -71,10 +72,29 @@ const AdminDashboard = memo(function AdminDashboard({
     const sPct = totalCount && catSum ? Math.round((serviceSum / catSum) * 100) : 0;
     const aPct = totalCount && catSum ? Math.max(0, 100 - fPct - sPct) : 0;
 
+    // UX/Accuracy: Dynamically compute positive satisfaction percentage and rating descriptor from live feedback data
+    // so empty feedback states or low-rating alerts do not display misleading hardcoded "Very Good • 92% Positive"
+    const nonAlerts = Math.max(0, totalCount - alerts);
+    const positivePct = totalCount ? Math.round((nonAlerts / totalCount) * 100) : 0;
+    const numAvg = totalCount ? scoreSum / divisor : 0;
+    const ratingLabel = !totalCount
+      ? 'Awaiting scans'
+      : numAvg >= 4.5
+      ? 'Excellent'
+      : numAvg >= 3.5
+      ? 'Very Good'
+      : numAvg >= 2.5
+      ? 'Average'
+      : 'Needs Attention';
+    const ratingSubtitle = !totalCount
+      ? 'No reviews recorded yet'
+      : `${ratingLabel} • ${positivePct}% Positive`;
+
     return {
       total: totalCount,
       pendingAlerts: pending,
       avgRating: totalCount ? (scoreSum / divisor).toFixed(1) : '0.0',
+      ratingSubtitle,
       totalAlertsCount: alerts,
       avgFood: totalCount ? (foodSum / divisor).toFixed(1) : '0.0',
       avgService: totalCount ? (serviceSum / divisor).toFixed(1) : '0.0',
@@ -206,8 +226,14 @@ const AdminDashboard = memo(function AdminDashboard({
               </div>
               <div className="text-3xl font-black">{total}</div>
               <div className="text-xs text-blue-100 font-bold mt-2 flex items-center gap-1">
-                <ArrowUpRight className="w-3.5 h-3.5" />
-                <span>+18% vs yesterday</span>
+                {total > 0 ? (
+                  <>
+                    <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>+18% vs yesterday</span>
+                  </>
+                ) : (
+                  <span>Awaiting first scan ✨</span>
+                )}
               </div>
             </div>
 
@@ -226,7 +252,7 @@ const AdminDashboard = memo(function AdminDashboard({
                 <span className="text-yellow-300 text-xl">★</span>
               </div>
               <div className="text-xs text-emerald-100 font-bold mt-2">
-                Very Good • 92% Positive
+                {ratingSubtitle}
               </div>
             </div>
 

@@ -15,6 +15,15 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-10-31 — Dynamic Dashboard Rating Sentiment & Safe Modal Ratings
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- ⚡ Dynamically computed positive satisfaction percentage and rating descriptor in `AdminDashboard.jsx` from live feedback store data in `useMemo`, replacing the hardcoded "Very Good • 92% Positive" text on Tile 2.
+- 🎨 Added clean empty state handling for AdminDashboard KPI tiles (Tile 1 shows "Awaiting first scan ✨", Tile 2 shows "No reviews recorded yet") when zero feedbacks exist.
+- 🛡️ Added safe optional chaining and fallback values (`?.` and `?? '-'`) to ratings breakdown display in `FeedbackDetailModal.jsx` to prevent unhandled `TypeError` crashes on missing rating records.
+- 🎨 Bound selected table in `QrStandeeGenerator.jsx` within `1..totalTables` so configuring smaller cafes doesn't produce out-of-bounds table selection or invalid standee QR codes.
+**PR:** `chore(atlas): dynamic dashboard rating sentiment & safe modal ratings [2026-10-31]`
+
 ### 2026-10-30 — Settings Zero Coercion Fix & Diner View Focus Management
 **Status:** ✅ Completed by ATLAS
 **Fixed:**
