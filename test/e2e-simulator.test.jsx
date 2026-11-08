@@ -25,7 +25,7 @@ describe('Section B.1 & End-to-End Split Simulator Integration', () => {
 
     // 1. Verify split view contains both Diner and Admin components
     expect(screen.getAllByText('#12').length).toBeGreaterThanOrEqual(1); // Table 12 in diner / select
-    expect(screen.getByText(/Live Table Feedback Stream/i)).toBeInTheDocument(); // Admin dashboard stream
+    expect(await screen.findByText(/Live Table Feedback Stream/i)).toBeInTheDocument(); // Admin dashboard stream
     expect(screen.getByText("Today's Feedbacks")).toBeInTheDocument();
 
     // 2. Interact with Diner side: Click "Share Your Feedback"
@@ -33,7 +33,7 @@ describe('Section B.1 & End-to-End Split Simulator Integration', () => {
     await user.click(dinerStartBtn);
 
     // 3. Select custom tag & type comment
-    const wifiTag = screen.getByRole('button', { name: 'High-Speed WiFi 📶' });
+    const wifiTag = screen.getByRole('button', { name: /High-Speed WiFi/i });
     await user.click(wifiTag);
 
     const commentInput = screen.getByPlaceholderText(/Optional note for Rohan & team.../i);

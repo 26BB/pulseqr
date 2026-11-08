@@ -83,8 +83,8 @@ describe('Section A: Diner Flow Tests', () => {
     await user.click(screen.getByRole('button', { name: /Share Your Feedback/i }));
 
     // Click tags
-    const oatMilkTag = screen.getByRole('button', { name: 'Oat Milk 🥛' });
-    const fastBaristaTag = screen.getByRole('button', { name: 'Fast Barista ⚡' });
+    const oatMilkTag = screen.getByRole('button', { name: /Oat Milk/i });
+    const fastBaristaTag = screen.getByRole('button', { name: /Fast Barista/i });
 
     await user.click(oatMilkTag);
     await user.click(fastBaristaTag);
@@ -167,7 +167,7 @@ describe('Section A: Diner Flow Tests', () => {
     await user.click(screen.getByRole('button', { name: /Share Your Feedback/i }));
 
     // Click terrible rating for food
-    const terribleButtons = screen.getAllByRole('button', { name: 'Terrible' });
+    const terribleButtons = screen.getAllByRole('button', { name: /Terrible/i });
     await user.click(terribleButtons[0]); // first category is food
 
     await user.click(screen.getByRole('button', { name: /Submit & Reveal Perk/i }));
