@@ -22,41 +22,49 @@ const DemoBar = memo(function DemoBar({
     return Array.from({ length: count }, (_, i) => (i + 1).toString().padStart(2, '0'));
   }, [tableCount]);
   return (
-    <header className="sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-md px-4 py-2.5">
+    <header className="sticky top-0 z-40 bg-white text-slate-900 border-b border-slate-200 shadow-sm px-4 py-2.5">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
         
         {/* Brand & Context */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#1E60FF] text-[#FFD000] font-black flex items-center justify-center text-base shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-[#1E60FF] text-white font-bold flex items-center justify-center text-sm shadow-sm">
             ⚡
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm tracking-tight text-white">PulseQR</span>
-              <span className="bg-[#FFD000] text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full">
+              <span className="font-bold text-sm tracking-tight text-slate-900">PulseQR</span>
+              <span className="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                 MVP • Variant 1
               </span>
               {alertCount > 0 && (
-                <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                <span className="bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
                   <span>🚨</span> {alertCount} Alert{alertCount > 1 ? 's' : ''}
                 </span>
               )}
             </div>
-            <div className="text-[10px] text-slate-400">Brew & Beans • Lane 5, Koregaon Park, Pune</div>
+            <div className="text-[10px] text-slate-500">Brew & Beans • Lane 5, Koregaon Park, Pune</div>
           </div>
         </div>
 
         {/* View Switcher Pills */}
+<<<<<<< Updated upstream
         <div role="tablist" aria-label="View switch options" className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+=======
+        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+>>>>>>> Stashed changes
           <button
             type="button"
             role="tab"
             aria-selected={currentView === 'diner'}
             onClick={() => onViewChange('diner')}
+<<<<<<< Updated upstream
             className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF] ${
+=======
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+>>>>>>> Stashed changes
               currentView === 'diner'
-                ? 'bg-[#1E60FF] text-white shadow-sm'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-white text-[#1E60FF] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
@@ -68,10 +76,14 @@ const DemoBar = memo(function DemoBar({
             role="tab"
             aria-selected={currentView === 'admin'}
             onClick={() => onViewChange('admin')}
+<<<<<<< Updated upstream
             className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF] ${
+=======
+            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+>>>>>>> Stashed changes
               currentView === 'admin'
-                ? 'bg-[#1E60FF] text-white shadow-sm'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-white text-[#1E60FF] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
@@ -83,10 +95,14 @@ const DemoBar = memo(function DemoBar({
             role="tab"
             aria-selected={currentView === 'split'}
             onClick={() => onViewChange('split')}
+<<<<<<< Updated upstream
             className={`hidden md:flex px-3 py-1.5 rounded-lg font-bold items-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF] ${
+=======
+            className={`hidden md:flex px-3 py-1.5 rounded-lg font-semibold items-center gap-1.5 transition-colors cursor-pointer ${
+>>>>>>> Stashed changes
               currentView === 'split'
-                ? 'bg-[#1E60FF] text-white shadow-sm'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-white text-[#1E60FF] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <SplitSquareVertical className="w-3.5 h-3.5" aria-hidden="true" />
@@ -97,19 +113,31 @@ const DemoBar = memo(function DemoBar({
         {/* Demo Controls */}
         <div className="flex items-center gap-2">
           {/* Table Selector */}
+<<<<<<< Updated upstream
           <div className="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
             <label htmlFor="demo-table-select" className="text-[10px] text-slate-400">
               Table:
             </label>
+=======
+          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
+            <span className="text-[10px] text-slate-500">Table:</span>
+>>>>>>> Stashed changes
             <select
               id="demo-table-select"
               aria-label="Select demo table number"
               value={currentTable}
               onChange={(e) => onTableChange(e.target.value)}
+<<<<<<< Updated upstream
               className="bg-transparent font-bold text-[#FFD000] text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD000] rounded cursor-pointer"
             >
               {tableOptions.map((t) => (
                 <option key={t} value={t} className="bg-slate-900 text-white">
+=======
+              className="bg-transparent font-semibold text-slate-800 text-xs cursor-pointer rounded"
+            >
+              {TABLE_OPTIONS.map((t) => (
+                <option key={t} value={t} className="bg-white text-slate-900">
+>>>>>>> Stashed changes
                   #{t}
                 </option>
               ))}
@@ -120,7 +148,11 @@ const DemoBar = memo(function DemoBar({
           <button
             type="button"
             onClick={onOpenDocs}
+<<<<<<< Updated upstream
             className="bg-gradient-to-r from-[#FF6B4A] to-[#FF8C00] hover:from-[#FF5530] hover:to-[#FF7700] text-white font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all shadow cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B4A]"
+=======
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+>>>>>>> Stashed changes
             title="Read PRD, Market Sizing, User Research & GTM Docs"
           >
             <span aria-hidden="true">📚</span>
@@ -131,7 +163,11 @@ const DemoBar = memo(function DemoBar({
           <button
             type="button"
             onClick={onOpenStandee}
+<<<<<<< Updated upstream
             className="bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 font-semibold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+=======
+            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+>>>>>>> Stashed changes
             title="Generate and print table QR standees"
           >
             <QrCode className="w-3.5 h-3.5" aria-hidden="true" />
@@ -142,7 +178,11 @@ const DemoBar = memo(function DemoBar({
           <button
             type="button"
             onClick={onSimulateFeedback}
+<<<<<<< Updated upstream
             className="bg-[#FFD000] hover:bg-[#ECC000] text-slate-950 font-black px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD000]"
+=======
+            className="bg-[#1E60FF] hover:bg-[#0D4EE8] text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-colors cursor-pointer"
+>>>>>>> Stashed changes
             title="Simulate a real diner scanning and submitting feedback"
           >
             <Zap className="w-3.5 h-3.5" aria-hidden="true" />
@@ -153,8 +193,12 @@ const DemoBar = memo(function DemoBar({
           <button
             type="button"
             onClick={onResetData}
+<<<<<<< Updated upstream
             aria-label="Reset data to default seed"
             className="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+=======
+            className="text-slate-600 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+>>>>>>> Stashed changes
             title="Reset data to default seed"
           >
             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />

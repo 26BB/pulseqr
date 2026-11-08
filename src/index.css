@@ -1,28 +1,55 @@
+/* Hallmark stamp: pulseqr-light v1.0.0 | light-minimal | bistro-chalk-swiss */
 @import "tailwindcss";
 
 @layer base {
   :root {
+    /* Bedrock & Surfaces (Pristine Light Theme) */
+    --canvas: #F8FAFC;
+    --surface-diner: #FAFAF9;
+    --surface-admin: #FFFFFF;
+    --surface-subtle: #F1F5F9;
+    --surface-hover: #E2E8F0;
+    --surface-card: #FFFFFF;
+
+    /* Architectural Hairlines */
+    --border-hairline: #E2E8F0;
+    --border-hairline-strong: #CBD5E1;
+    --border-focus: #1E60FF;
+
+    /* High-Contrast Typography */
+    --text-high: #0F172A;
+    --text-med: #334155;
+    --text-muted: #64748B;
+    --text-main: #0F172A;
+
+    /* Brand Accents */
     --primary-blue: #1E60FF;
     --primary-blue-hover: #0D4EE8;
-    --primary-blue-glow: rgba(30, 96, 255, 0.25);
-    --sunny-yellow: #FFD000;
-    --sunny-yellow-light: #FFF8D6;
-    --sunny-yellow-hover: #ECC000;
-    --accent-emerald: #10B981;
-    --accent-coral: #FF5A5F;
-    --bg-main: #F8FAFC;
-    --bg-card: #FFFFFF;
-    --text-main: #0F172A;
-    --text-muted: #64748B;
-    --border-light: #E2E8F0;
+    --primary-blue-surface: #EFF6FF;
+    --primary-blue-glow: rgba(30, 96, 255, 0.12);
+
+    --sunny-yellow: #F59E0B;
+    --sunny-yellow-light: #FEF3C7;
+    --sunny-yellow-hover: #D97706;
+
+    --accent-emerald: #059669;
+    --accent-emerald-surface: #ECFDF5;
+
+    --accent-coral: #DC2626;
+    --accent-coral-surface: #FEF2F2;
+
+    /* Typography */
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
-  body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  html, body {
+    background-color: var(--canvas);
+    color: var(--text-high);
+    font-family: var(--font-sans);
     margin: 0;
     padding: 0;
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
@@ -33,66 +60,113 @@
     display: flex;
     flex-direction: column;
   }
+
+  /* Hallmark Floor: Focus Visible */
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
 }
 
-/* Custom Electric Blue + Sunny Yellow Utilities */
+/* Custom Electric Blue + Sunny Yellow Utilities (Refined & Accessible) */
 .bg-electric-blue {
-  background-color: #1E60FF;
+  background-color: var(--primary-blue);
 }
 
 .text-electric-blue {
-  color: #1E60FF;
+  color: var(--primary-blue);
 }
 
 .border-electric-blue {
-  border-color: #1E60FF;
+  border-color: var(--primary-blue);
 }
 
 .bg-sunny-yellow {
-  background-color: #FFD000;
+  background-color: var(--sunny-yellow);
 }
 
 .text-sunny-yellow {
-  color: #FFD000;
+  color: var(--sunny-yellow);
 }
 
 .border-sunny-yellow {
-  border-color: #FFD000;
+  border-color: var(--sunny-yellow);
 }
 
+/* Refined Architectural Elevation Shadows (No murky AI slop) */
 .glow-blue {
-  box-shadow: 0 10px 25px -5px rgba(30, 96, 255, 0.3), 0 8px 10px -6px rgba(30, 96, 255, 0.2);
+  box-shadow: 0 4px 12px -2px rgba(30, 96, 255, 0.2), 0 2px 6px -1px rgba(30, 96, 255, 0.1);
 }
 
 .glow-yellow {
-  box-shadow: 0 10px 25px -5px rgba(255, 208, 0, 0.4), 0 8px 10px -6px rgba(255, 208, 0, 0.25);
+  box-shadow: 0 4px 12px -2px rgba(245, 158, 11, 0.2), 0 2px 6px -1px rgba(245, 158, 11, 0.1);
 }
 
 .glow-card {
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
 }
 
-/* Custom Scrollbar */
+/* Custom Clean Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F1F5F9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #94A3B8;
 }
 
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
+/* Tabular Numerics for Timestamps & Incident Badges */
+.tabular-nums {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s infinite ease-in-out;
+/* Reduced Motion Fallback (Hallmark Floor Rule 7) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ==========================================================================
+   PulseQR Mobile Responsive Hardening (<= 640px)
+   ========================================================================== */
+@media (max-width: 640px) {
+  header.sticky {
+    padding: 8px 12px !important;
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Optimize faux device frame on actual mobile viewports */
+  .rounded-\[48px\] {
+    border-radius: 20px !important;
+    border-width: 2px !important;
+    padding: 8px !important;
+  }
+
+  .rounded-\[36px\] {
+    border-radius: 16px !important;
+    min-height: auto !important;
+    padding: 12px !important;
+  }
+
+  /* Table item cells wrap cleanly */
+  .max-w-\[1600px\] {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
 }

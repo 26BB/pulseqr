@@ -13,6 +13,14 @@
 
 ---
 
+## 📸 Product Preview
+
+[![PulseQR Diner & Manager Operations Console](./docs/screenshots/live-preview.png)](https://pulseqr-app.vercel.app/?view=split&table=04)
+
+*Real-time split view: frictionless mobile diner scan & review experience (left) synchronized with instant manager alerting and sentiment analytics dashboard (right).*
+
+---
+
 ## 💡 Executive Summary (Plain English — For HR & Non-Technical Readers)
 
 ### **What is PulseQR?**
