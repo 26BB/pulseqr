@@ -15,6 +15,14 @@
 
 ## ✅ Completed Log (most recent first)
 
+### 2026-11-01 — Synchronize Current Table with Settings Table Count & Settings Form Clamping
+**Status:** ✅ Completed by ATLAS
+**Fixed:**
+- 🛡️ Added a synchronization effect in `App.jsx` to clamp `currentTable` within `1..settings.tableCount` whenever cafe settings update, preventing out-of-bounds table states and keeping the URL query parameter `?table=` in sync.
+- 🎨 Added `onBlur` input bounds clamping (`1..100`) to the active table standees count input in `SettingsView.jsx`.
+- 🎨 Added explicit `focus-visible:ring-2 focus-visible:ring-[#1E60FF]` and `focus-visible:ring-emerald-500` focus indicators to `#settings-discount-code`, `#settings-alert-threshold`, and the WhatsApp test alert button in `SettingsView.jsx`.
+**PR:** `chore(atlas): clamp current table to settings count and improve settings validation [2026-11-01]`
+
 ### 2026-10-31 — Dynamic Dashboard Rating Sentiment & Safe Modal Ratings
 **Status:** ✅ Completed by ATLAS
 **Fixed:**

@@ -37,17 +37,31 @@ export default function App() {
     return sanitizeView(params.get('view'));
   });
 
+  const [settings, setSettings] = useState(getStoredSettings);
+
   const [currentTable, setCurrentTable] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return sanitizeTable(params.get('table'));
+    const initialRaw = sanitizeTable(params.get('table'));
+    const initialNum = Number(initialRaw);
+    const initialMax = Math.min(100, Math.max(1, Number(getStoredSettings()?.tableCount) || 15));
+    if (!initialNum || initialNum < 1 || initialNum > initialMax) {
+      return Math.min(initialMax, Math.max(1, initialNum || 1)).toString().padStart(2, '0');
+    }
+    return initialRaw;
   });
 
   // Optimization: Lazy state initialization avoids executing synchronous localStorage.getItem
   // and JSON.parse on every re-render of the root App component.
   const [feedbacks, setFeedbacks] = useState(getStoredFeedbacks);
-  const [settings, setSettings] = useState(getStoredSettings);
   const [standeesModalOpen, setStandeesModalOpen] = useState(false);
   const [docsModalOpen, setDocsModalOpen] = useState(false);
+
+  // Derive bounded table for current active settings to prevent out-of-bounds diner view or standee state
+  const maxTable = Math.min(100, Math.max(1, Number(settings?.tableCount) || 15));
+  const rawTableNum = Number(currentTable);
+  const effectiveTable = !rawTableNum || rawTableNum < 1 || rawTableNum > maxTable
+    ? Math.min(maxTable, Math.max(1, rawTableNum || 1)).toString().padStart(2, '0')
+    : currentTable;
 
   // Subscribe to real-time cross-tab updates & browser navigation
   useEffect(() => {
@@ -152,7 +166,7 @@ export default function App() {
       <DemoBar
         currentView={currentView}
         onViewChange={handleViewChange}
-        currentTable={currentTable}
+        currentTable={effectiveTable}
         onTableChange={handleTableChange}
         onSimulateFeedback={handleSimulateFeedback}
         onResetData={handleResetData}
@@ -167,7 +181,7 @@ export default function App() {
         {currentView === 'diner' && (
           <div className="py-6">
             <DinerView
-              table={currentTable}
+              table={effectiveTable}
               onSubmitFeedback={handleFeedbackSubmit}
               settings={settings}
             />
@@ -193,11 +207,11 @@ export default function App() {
             <div className="xl:col-span-4 flex flex-col items-center">
               <div className="w-full text-center mb-2">
                 <span className="text-xs font-black uppercase tracking-wider text-[#1E60FF] bg-blue-50 dark:bg-blue-950 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-                  📱 Diner Experience (Table #{currentTable})
+                  📱 Diner Experience (Table #{effectiveTable})
                 </span>
               </div>
               <DinerView
-                table={currentTable}
+                table={effectiveTable}
                 onSubmitFeedback={handleFeedbackSubmit}
                 settings={settings}
               />
