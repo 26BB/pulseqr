@@ -121,7 +121,11 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
                 max="100"
                 value={formData.tableCount ?? ''}
                 onChange={(e) => handleChange('tableCount', e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
+                onBlur={() => {
+                  const clamped = Math.min(100, Math.max(1, Number(formData.tableCount) || 1));
+                  handleChange('tableCount', clamped);
+                }}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF] focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
               />
             </div>
           </div>
@@ -165,7 +169,7 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
                   id="settings-alert-threshold"
                   value={formData.alertThreshold}
                   onChange={(e) => handleChange('alertThreshold', Number(e.target.value))}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF]"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#1E60FF] focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
                 >
                   <option value={1}>Ratings ≤ 1 Star (Emergency Only)</option>
                   <option value={2}>Ratings ≤ 2 Stars (Recommended)</option>
@@ -186,7 +190,7 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
               <button
                 type="button"
                 onClick={handleTestAlert}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow cursor-pointer"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Test Alert</span>
@@ -212,7 +216,7 @@ const SettingsView = memo(function SettingsView({ settings, onSaveSettings, onRe
                 maxLength={20}
                 value={formData.discountCode}
                 onChange={(e) => handleChange('discountCode', e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-[#1E60FF] focus:outline-none"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-[#1E60FF] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E60FF]"
               />
             </div>
 
