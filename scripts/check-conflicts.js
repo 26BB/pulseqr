@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 
-const marker = String.fromCharCode(60).repeat(7) + '|' + '='.repeat(7) + '|' + String.fromCharCode(62).repeat(7);
+const marker = '^(' + String.fromCharCode(60).repeat(7) + '|' + '='.repeat(7) + '|' + String.fromCharCode(62).repeat(7) + ')';
 
 try {
   const out = execSync('git grep -nE "' + marker + '" src/', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
