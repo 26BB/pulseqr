@@ -33,12 +33,14 @@
 
 ---
 
-## 📊 Business ROI & Key Results
+## 📊 Projected Impact (Target Benchmarks)
 
-| Business Metric | Before PulseQR | With PulseQR | Real Impact |
+> *Note: Target benchmarks below are simulated/projected goals for the MVP concept, not live production metrics.*
+
+| Business Metric | Before PulseQR | Target With PulseQR | Projected Impact |
 | :--- | :--- | :--- | :--- |
-| **Customer Feedback Rate** | < 3% (paper forms ignored) | **38% scan & completion** | 12x increase in customer insights |
-| **Public 1-Star Review Avoidance** | 0% (reviews surprise owner online) | **82% intercepted in-cafe** | Protects cafe Google Maps rating (>4.5 stars) |
+| **Customer Feedback Rate** | < 3% (paper forms ignored) | **~38% scan & completion** | ~12x increase in customer insights |
+| **Public 1-Star Review Avoidance** | 0% (reviews surprise owner online) | **~80%+ intercepted in-cafe** | Protects cafe Google Maps rating (>4.5 stars) |
 | **Feedback Time Required** | 2–3 minutes | **< 15 seconds** | Frictionless diner experience |
 
 ---
